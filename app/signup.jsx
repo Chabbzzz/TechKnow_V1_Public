@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View, StyleSheet, Text, Pressable, Keyboard, findNodeHandle } from "react-native";
+import { View, StyleSheet, Text, Pressable, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { COLORS } from "../constants/theme";
@@ -53,17 +53,13 @@ export default function SignupScreen() {
   );
 
   const scrollConfirmPasswordIntoView = () => {
-    const inputHandle = findNodeHandle(confirmInput.current);
-    const responder = signupScroll.current?.getScrollResponder?.();
-    if (inputHandle != null) {
-      responder?.scrollResponderScrollNativeHandleToKeyboard?.(inputHandle, 36, true);
-    }
+    signupScroll.current?.scrollToEnd({ animated: true });
   };
 
   React.useEffect(() => {
     const keyboardDidShow = Keyboard.addListener("keyboardDidShow", () => {
       if (confirmPasswordFocused.current) {
-        scrollConfirmPasswordIntoView();
+        requestAnimationFrame(scrollConfirmPasswordIntoView);
       }
     });
     const keyboardDidHide = Keyboard.addListener("keyboardDidHide", () => {
@@ -212,7 +208,7 @@ export default function SignupScreen() {
               onFocus={() => {
                 preKeyboardScrollOffset.current = signupScrollOffset.current;
                 confirmPasswordFocused.current = true;
-                setTimeout(scrollConfirmPasswordIntoView, 150);
+                requestAnimationFrame(scrollConfirmPasswordIntoView);
               }}
               returnKeyType="done" onSubmitEditing={handleSignup} />
             {confirmPassword ? <FieldCheck valid={confirmPasswordValid} message={confirmPasswordValid ? "Passwords match." : "Passwords do not match yet."} /> : null}
