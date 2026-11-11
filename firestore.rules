@@ -1,0 +1,375 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function unrestricted(data) {
+      return !(data.get('status', 'Active').lower() in ['suspended', 'banned', 'disabled'])
+        && data.get('adminOperationId', null) == null;
+    }
+    function active() { return signedIn() && unrestricted(profile()); }
+    function admin() {
+      return signedIn() && request.auth.uid == 'techknow-superadmin'
+        && request.auth.token.get('superAdmin', false) == true
+        && profile().role == 'Super Admin' && profile().status == 'Active'
+        && unrestricted(profile());
+    }
+    function customer() { return active() && profile().get('role', 'Customer') == 'Customer'; }
+    function owns(storeId) {
+      let store = get(/databases/$(database)/documents/stores/$(storeId)).data;
+      return active() && profile().get('role', '') == 'Store Admin'
+        && profile().get('storeId', request.auth.uid) == storeId
+        && request.auth.uid in [store.get('ownerId', ''), store.get('ownerUid', ''), store.get('uid', '')]
+        && unrestricted(store);
+    }
+    function text(value, max) { return value is string && value.size() <= max; }
+    function changedOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
+    // Every moderation action binds the real author, private notice and immutable audit.
+    function reviewModeration(id) {
+      let n = getAfter(/databases/$(database)/documents/moderationNotifications/$(id)).data;
+      let before = get(/databases/$(database)/documents/reviews/$(n.reviewId)).data;
+      let after = getAfter(/databases/$(database)/documents/reviews/$(n.reviewId)).data;
+      let user = get(/databases/$(database)/documents/users/$(n.userId)).data;
+      let nextUser = getAfter(/databases/$(database)/documents/users/$(n.userId)).data;
+      let audit = getAfter(/databases/$(database)/documents/auditLogs/$(id)).data;
+      return admin() && !exists(/databases/$(database)/documents/moderationNotifications/$(id))
+        && !exists(/databases/$(database)/documents/auditLogs/$(id))
+        && n.keys().hasOnly(['userId', 'reviewId', 'action', 'reason', 'adminUid', 'createdAt'])
+        && n.adminUid == request.auth.uid && n.createdAt == request.time
+        && n.action in ['warning', 'suspend'] && text(n.reason, 1000) && n.reason.size() > 0
+        && n.userId == before.userId && n.userId != request.auth.uid
+        && user.get('role', 'Customer') == 'Customer' && unrestricted(user)
+        && (before.get('status', '').lower() in ['approved', 'published']
+          || before.get('reviewReport', {}).get('status', '') == 'pending' || before.get('authorModerationId', '') != '')
+        && before.get('authorModerationId', '') != id && after.authorModerationId == id
+        && after.updatedAt == request.time
+        && after.diff(before).affectedKeys().hasOnly(['authorModerationId', 'updatedAt', 'reviewReport'])
+        && (before.get('reviewReport', {}).get('status', '') == 'pending'
+          ? after.reviewReport.status == 'actioned' && after.reviewReport.diff(before.reviewReport).affectedKeys().hasOnly(['status'])
+          : after.get('reviewReport', null) == before.get('reviewReport', null))
+        && audit.diff(n).affectedKeys().hasOnly(['target', 'status', 'notificationId'])
+        && audit.target == n.reviewId && audit.status == 'completed' && audit.notificationId == id
+        && (n.action == 'warning'
+          ? before.get('authorModerationId', '') == '' && nextUser == user
+          : nextUser.diff(user).affectedKeys().hasOnly(['status', 'suspensionReason', 'suspensionReviewId', 'suspendedAt', 'moderationNotificationId', 'updatedAt'])
+            && nextUser.status == 'Suspended' && nextUser.suspensionReason == n.reason
+            && nextUser.suspensionReviewId == n.reviewId && nextUser.suspendedAt == request.time
+            && nextUser.moderationNotificationId == id && nextUser.updatedAt == request.time);
+    }
+    function pendingPermit(uid, storeId, id) {
+      let submission = getAfter(/databases/$(database)/documents/permitSubmissions/$(id)).data;
+      return submission.uid == uid && submission.storeId == storeId
+        && submission.status == 'pending' && submission.verificationStatus == 'pending';
+    }
+    function directoryMatchesStore(storeId) {
+      let store = getAfter(/databases/$(database)/documents/stores/$(storeId)).data;
+      let listing = request.resource.data;
+      return listing.keys().hasOnly(['id', 'name', 'address', 'latitude', 'longitude', 'status', 'verificationStatus', 'updatedAt'])
+        && listing.id == storeId
+        && listing.name == store.get('name', store.get('storeName', store.get('businessName', '')))
+        && listing.address == store.get('address', '')
+        && listing.latitude == store.get('latitude', null)
+        && listing.longitude == store.get('longitude', null)
+        && listing.status == store.get('status', 'Active')
+        && listing.verificationStatus == store.get('verificationStatus', 'pending')
+        && listing.updatedAt == store.get('updatedAt', request.time);
+    }
+    match /users/{uid} {
+      allow update: if admin() && request.resource.data.status == 'Suspended'
+        && reviewModeration(request.resource.data.moderationNotificationId)
+        && getAfter(/databases/$(database)/documents/moderationNotifications/$(request.resource.data.moderationNotificationId)).data.userId == uid;
+      allow get: if (signedIn() && request.auth.uid == uid) || admin();
+      allow list: if admin();
+      allow create: if signedIn() && request.auth.uid == uid && uid != 'techknow-superadmin'
+        && request.resource.data.keys().hasOnly(['uid', 'fullName', 'email', 'address', 'createdAt', 'updatedAt',
+          'username', 'usernameLower', 'role', 'status', 'storeId', 'storeName', 'latitude', 'longitude'])
+        && request.resource.data.uid == uid && request.resource.data.email == request.auth.token.email
+        && text(request.resource.data.fullName, 200) && text(request.resource.data.address, 1000)
+        && request.resource.data.createdAt == request.time
+        && (!request.resource.data.keys().hasAny(['username', 'usernameLower'])
+          || (text(request.resource.data.username, 40) && text(request.resource.data.usernameLower, 40)
+            && request.resource.data.usernameLower.matches('^[a-z0-9._-]{3,40}$')
+            && request.resource.data.usernameLower == request.resource.data.username.lower()
+            && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == uid))
+        && ((request.resource.data.get('role', 'Customer') == 'Customer'
+          && request.resource.data.get('status', 'Active') == 'Active'
+          && !request.resource.data.keys().hasAny(['storeId', 'storeName']))
+          || (request.resource.data.role == 'Store Admin' && request.resource.data.status == 'Pending Verification'
+            && request.resource.data.storeId == uid
+            && getAfter(/databases/$(database)/documents/stores/$(uid)).data.ownerId == uid));
+      allow update: if active() && request.auth.uid == uid && (
+        (changedOnly(['fullName', 'address', 'email', 'uid', 'updatedAt', 'presenceSessions', 'notificationReadIds', 'username', 'usernameLower'])
+          && request.resource.data.get('uid', uid) == uid
+          && request.resource.data.email == request.auth.token.email
+          && text(request.resource.data.get('fullName', ''), 200) && text(request.resource.data.get('address', ''), 1000)
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['username', 'usernameLower'])
+            || (request.resource.data.keys().hasAll(['username', 'usernameLower'])
+              && text(request.resource.data.username, 40) && text(request.resource.data.usernameLower, 40)
+              && request.resource.data.usernameLower.matches('^[a-z0-9._-]{3,40}$')
+              && request.resource.data.usernameLower == request.resource.data.username.lower()
+              && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == uid))
+          && request.resource.data.get('presenceSessions', {}) is map
+          && request.resource.data.get('presenceSessions', {}).size() <= 100
+          && request.resource.data.get('notificationReadIds', []) is list
+          && request.resource.data.get('notificationReadIds', []).size() <= 10000)
+        || (owns(resource.data.get('storeId', uid))
+          && changedOnly(['permitSubmissionId', 'verificationStatus', 'status', 'updatedAt'])
+          && request.resource.data.status == 'Pending Verification'
+          && request.resource.data.verificationStatus == 'pending'
+          && pendingPermit(uid, resource.data.get('storeId', uid), request.resource.data.permitSubmissionId)));
+    }
+    match /usernames/{usernameLower} {
+      // Username markers reveal no email and are readable only by their owner.
+      allow get: if signedIn() && resource.data.uid == request.auth.uid;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'username'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username.lower() == usernameLower
+        && request.resource.data.username.matches('^[A-Za-z0-9._-]{3,40}$')
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.usernameLower == usernameLower;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.usernameLower != usernameLower;
+    }
+    match /storeDirectory/{storeId} {
+      // This allowlisted projection is the only store data customers can query.
+      allow read: if active();
+      allow create: if (signedIn() && request.auth.uid == storeId
+          && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Store Admin'
+          && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.storeId == storeId
+          && getAfter(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid
+          && directoryMatchesStore(storeId))
+        || (owns(storeId) && directoryMatchesStore(storeId));
+      allow update: if owns(storeId) && changedOnly(['name', 'address', 'latitude', 'longitude', 'status', 'verificationStatus', 'updatedAt'])
+        && directoryMatchesStore(storeId);
+      allow delete: if false;
+    }
+    match /stores/{storeId} {
+      // Owner/admin records include account and ownership fields. Keep them private.
+      allow read: if admin() || owns(storeId);
+      allow create: if signedIn() && storeId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['id', 'ownerId', 'ownerUid', 'adminName', 'email', 'username',
+          'name', 'storeName', 'address', 'latitude', 'longitude', 'status', 'verificationStatus', 'createdAt', 'updatedAt'])
+        && request.resource.data.id == storeId && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'Pending Verification' && request.resource.data.verificationStatus == 'pending'
+        && text(request.resource.data.name, 200) && text(request.resource.data.address, 1000)
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Store Admin'
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.storeId == storeId;
+      allow update: if owns(storeId)
+        && changedOnly(['permitSubmissionId', 'verificationStatus', 'status', 'updatedAt'])
+        && request.resource.data.status == 'Pending Verification' && request.resource.data.verificationStatus == 'pending'
+        && pendingPermit(request.auth.uid, storeId, request.resource.data.permitSubmissionId);
+      // Product limits and account restrictions are written only by trusted functions.
+    }
+    match /products/{productId} {
+      function validProduct() {
+        let d = request.resource.data;
+        return text(d.name, 200) && d.name.size() > 0 && text(d.category, 200) && d.category.size() > 0
+          && d.price is number && d.price >= 0 && d.price <= 1000000000
+          && d.stock is int && d.stock >= 0 && d.stock <= 10
+          && d.status == (d.stock == 0 ? 'Out of Stock' : d.stock <= 4 ? 'Low Stock' : 'Available')
+          && (d.get('description', null) == null || text(d.description, 5000))
+          && (d.get('imageUrl', null) == null || text(d.imageUrl, 716800))
+          && (d.get('imagePath', null) == null || text(d.imagePath, 1024));
+      }
+      function reservationIncrement() {
+        let id = request.resource.data.lastReservationId;
+        let reservation = getAfter(/databases/$(database)/documents/reservations/$(id)).data;
+        return customer() && changedOnly(['reservationCount', 'lastReservationId'])
+          && !exists(/databases/$(database)/documents/reservations/$(id))
+          && reservation.userId == request.auth.uid && reservation.productId == productId
+          && reservation.storeId == resource.data.storeId && reservation.createdAt == request.time
+          && request.resource.data.reservationCount == resource.data.get('reservationCount', 0) + 1;
+      }
+      allow read: if active();
+      allow create: if false; // createStoreProduct enforces store limits with Admin SDK.
+      allow update: if (owns(resource.data.storeId)
+          && changedOnly(['name', 'category', 'price', 'stock', 'status', 'description', 'imageUrl', 'imagePath', 'archived', 'archivedAt', 'updatedAt'])
+          && validProduct() && request.resource.data.updatedAt == request.time
+          && request.resource.data.get('archived', false) is bool
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['archived'])
+            || request.resource.data.archived == false || request.resource.data.archivedAt == request.time))
+        || reservationIncrement();
+      allow delete: if owns(resource.data.storeId) && resource.data.get('archived', false) == true;
+    }
+    match /reservations/{id} {
+      function validCreation() {
+        let d = request.resource.data;
+        let product = get(/databases/$(database)/documents/products/$(d.productId)).data;
+        let after = getAfter(/databases/$(database)/documents/products/$(d.productId)).data;
+        let store = get(/databases/$(database)/documents/stores/$(d.storeId)).data;
+        return d.keys().hasOnly(['userId', 'user', 'userEmail', 'productId', 'product', 'unitPrice', 'price', 'category',
+          'shop', 'storeId', 'date', 'time', 'note', 'quantity', 'stockAdjusted', 'status', 'reservationType', 'createdAtMs', 'createdAt', 'updatedAt'])
+          && d.userId == request.auth.uid && d.userEmail == request.auth.token.email
+          && text(d.user, 200) && text(d.price, 100)
+          && product.storeId == d.storeId && product.get('archived', false) == false && unrestricted(store)
+          && d.product == product.get('name', product.get('title', 'Unnamed product'))
+          && d.unitPrice == product.price && d.category == product.get('category', 'Uncategorized')
+          && d.shop == store.get('name', store.get('storeName', store.get('businessName', '')))
+          && d.quantity == 1 && d.stockAdjusted == false
+          && d.status == (product.stock == 0 ? 'Waiting List' : 'Pending')
+          && d.reservationType == (product.stock == 0 ? 'waiting-list' : 'reservation')
+          && text(d.date, 100) && text(d.time, 100) && text(d.note, 2000)
+          && d.createdAt == request.time && d.updatedAt == request.time
+          && after.reservationCount == product.get('reservationCount', 0) + 1 && after.lastReservationId == id;
+      }
+      function stockTransition() {
+        let old = resource.data;
+        let next = request.resource.data;
+        let before = get(/databases/$(database)/documents/products/$(old.productId)).data;
+        let after = getAfter(/databases/$(database)/documents/products/$(old.productId)).data;
+        let quantity = old.get('quantity', 1);
+        return before.storeId == old.storeId && after.storeId == old.storeId
+          && quantity is int && quantity > 0
+          && (next.status == 'Accepted'
+            ? before.get('archived', false) == false && after.stock >= 0
+              && after.stock == before.stock - (old.get('stockAdjusted', false) ? 0 : quantity)
+            : after.stock == before.stock + quantity);
+      }
+      allow read: if active() && (resource.data.userId == request.auth.uid || owns(resource.data.storeId) || admin());
+      allow create: if customer() && validCreation();
+      allow update: if (owns(resource.data.storeId)
+        && resource.data.status in ['Pending', 'Waiting List', 'Waitlisted', 'waiting-list']
+        && changedOnly(['status', 'stockAdjusted', 'acceptedAt', 'rejectedAt', 'updatedAt'])
+        && request.resource.data.status in ['Accepted', 'Rejected']
+        && request.resource.data.stockAdjusted == (request.resource.data.status == 'Accepted')
+        && request.resource.data.updatedAt == request.time
+        && (request.resource.data.status == 'Accepted' ? request.resource.data.acceptedAt == request.time : request.resource.data.rejectedAt == request.time)
+        && ((request.resource.data.status == 'Rejected' && resource.data.get('stockAdjusted', false) == false) || stockTransition()))
+        || (owns(resource.data.storeId)
+          && resource.data.status == 'Accepted'
+          && resource.data.get('stockAdjusted', false) == true
+          && changedOnly(['status', 'stockAdjusted', 'completedAt', 'updatedAt'])
+          && request.resource.data.status == 'Completed'
+          && request.resource.data.stockAdjusted == true
+          && request.resource.data.completedAt == request.time
+          && request.resource.data.updatedAt == request.time);
+    }
+    match /reviews/{id} {
+      allow update: if admin() && reviewModeration(request.resource.data.authorModerationId)
+        && getAfter(/databases/$(database)/documents/moderationNotifications/$(request.resource.data.authorModerationId)).data.reviewId == id;
+      function pendingReport(data) {
+        return data.get('reviewReport', null) != null
+          && data.reviewReport.get('status', '') == 'pending';
+      }
+      function storeAudit(action, reason, target) {
+        let auditId = request.resource.data.storeReviewAuditId;
+        let audit = getAfter(/databases/$(database)/documents/auditLogs/$(auditId)).data;
+        return auditId is string && auditId.size() > 0 && auditId.size() <= 128
+          && !exists(/databases/$(database)/documents/auditLogs/$(auditId))
+          && audit.target == id && audit.storeId == resource.data.storeId
+          && audit.adminUid == request.auth.uid && audit.status == 'completed'
+          && audit.action == action && audit.reason == reason
+          && audit.get('reportTarget', '') == target && audit.createdAt == request.time;
+      }
+      function storeApproval() {
+        let next = request.resource.data;
+        return resource.data.get('status', 'Pending').lower() == 'pending'
+          && !pendingReport(resource.data) && resource.data.get('flagged', false) == false
+          && resource.data.get('proofFlagged', false) == false
+          && changedOnly(['status', 'approvedBy', 'approvedAt', 'lastReviewAction', 'storeReviewAuditId', 'updatedAt'])
+          && next.status == 'Approved' && next.approvedBy == request.auth.uid
+          && next.approvedAt == request.time && next.updatedAt == request.time
+          && next.lastReviewAction.keys().hasOnly(['action', 'at'])
+          && next.lastReviewAction.action == 'approvedByStore' && next.lastReviewAction.at == request.time
+          && storeAudit('Approve store review', 'Approved by the owning store admin.', '');
+      }
+      function storeReport() {
+        let next = request.resource.data;
+        let report = next.reviewReport;
+        return !pendingReport(resource.data)
+          && changedOnly(['reviewReport', 'lastReviewAction', 'storeReviewAuditId', 'updatedAt'])
+          && report.keys().hasOnly(['status', 'target', 'reason', 'storeId', 'reporterUid', 'reportedAt'])
+          && report.status == 'pending' && report.target in ['proof', 'review']
+          && text(report.reason, 1000) && report.reason.size() > 0
+          && report.storeId == resource.data.storeId && report.reporterUid == request.auth.uid
+          && report.reportedAt == request.time && next.updatedAt == request.time
+          && (report.target == 'review'
+            || resource.data.get('proofFileUrl', '').matches('https?://.*|data:image/.*')
+            || resource.data.get('proofFile', '').matches('https?://.*|data:image/.*'))
+          && next.lastReviewAction.keys().hasOnly(['action', 'at'])
+          && next.lastReviewAction.action == 'reported' && next.lastReviewAction.at == request.time
+          && storeAudit('Store reported review', report.reason, report.target);
+      }
+      allow read: if active() && (resource.data.userId == request.auth.uid || owns(resource.data.storeId) || admin());
+      allow create: if customer()
+        && request.resource.data.keys().hasOnly(['userId', 'user', 'userEmail', 'storeId', 'storeName', 'product', 'rating', 'review',
+          'proofFile', 'proofFileUrl', 'proofFileName', 'proofStoragePath', 'status', 'flagged', 'risk', 'createdAt', 'updatedAt'])
+        && request.resource.data.userId == request.auth.uid && request.resource.data.userEmail == request.auth.token.email
+        && exists(/databases/$(database)/documents/stores/$(request.resource.data.storeId))
+        && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && text(request.resource.data.review, 5000) && request.resource.data.review.size() > 0
+        && text(request.resource.data.user, 200) && text(request.resource.data.storeName, 200)
+        && text(request.resource.data.proofFileUrl, 716800)
+        && request.resource.data.proofFileUrl.matches('data:image/(jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}')
+        && request.resource.data.proofFile == '' && request.resource.data.proofStoragePath == ''
+        && text(request.resource.data.proofFileName, 160) && request.resource.data.proofFileName.size() > 0
+        && request.resource.data.status == 'Pending' && request.resource.data.flagged == false && request.resource.data.risk == 'Low'
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if owns(resource.data.storeId) && (storeApproval() || storeReport());
+      // Customer feedback and proof remain private and cannot be edited by a store.
+    }
+    match /favorites/{id} {
+      allow get: if active() && (resource == null || resource.data.userId == request.auth.uid);
+      allow list: if active() && resource.data.userId == request.auth.uid;
+      allow create, update: if customer() && request.resource.data.userId == request.auth.uid
+        && (resource == null || resource.data.userId == request.auth.uid)
+        && id == request.auth.uid + '_' + request.resource.data.productId
+        && request.resource.data.keys().hasOnly(['userId', 'productId', 'product', 'shop', 'price', 'imageUrl', 'createdAt'])
+        && exists(/databases/$(database)/documents/products/$(request.resource.data.productId))
+        && request.resource.data.createdAt == request.time;
+      allow delete: if active() && resource.data.userId == request.auth.uid;
+    }
+    match /permitSubmissions/{id} {
+      function validSubmission() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['id', 'uid', 'storeId', 'storeName', 'permitType', 'permitNumber', 'issuingAuthority',
+          'issuedOn', 'expiresOn', 'businessName', 'status', 'verificationStatus', 'documents', 'createdAt', 'updatedAt', 'submittedAt', 'errorCode'])
+          && d.id == id && d.uid == request.auth.uid && owns(d.storeId)
+          && d.verificationStatus == 'pending' && d.documents is list && d.documents.size() <= 10
+          && text(d.get('permitType', ''), 200) && text(d.get('permitNumber', ''), 200)
+          && text(d.get('issuingAuthority', ''), 200) && text(d.get('businessName', ''), 200)
+          && text(d.get('issuedOn', ''), 200) && text(d.get('expiresOn', ''), 200)
+          && d.updatedAt == request.time;
+      }
+      allow read: if active() && (resource.data.uid == request.auth.uid || owns(resource.data.storeId) || admin());
+      allow create: if validSubmission() && request.resource.data.status == 'uploading'
+        && request.resource.data.documents.size() == 0 && request.resource.data.createdAt == request.time;
+      allow update: if active() && resource.data.uid == request.auth.uid && owns(resource.data.storeId)
+        && resource.data.status == 'uploading' && validSubmission()
+        && changedOnly(['documents', 'status', 'submittedAt', 'updatedAt', 'errorCode'])
+        && request.resource.data.status in ['pending', 'upload_failed']
+        && (request.resource.data.status != 'pending' || (request.resource.data.documents.size() > 0 && request.resource.data.submittedAt == request.time));
+    }
+    match /auditLogs/{id} {
+      allow create: if admin() && reviewModeration(id);
+      function storeReviewAudit() {
+        let d = request.resource.data;
+        let before = get(/databases/$(database)/documents/reviews/$(d.target)).data;
+        let after = getAfter(/databases/$(database)/documents/reviews/$(d.target)).data;
+        return d.keys().hasOnly(['action', 'target', 'reason', 'reportTarget', 'storeId', 'adminUid', 'status', 'createdAt'])
+          && owns(d.storeId) && d.adminUid == request.auth.uid && d.status == 'completed'
+          && d.createdAt == request.time && before.storeId == d.storeId && after.storeId == d.storeId
+          && before.get('storeReviewAuditId', '') != id && after.storeReviewAuditId == id
+          && after.updatedAt == request.time
+          && ((d.action == 'Approve store review' && d.reason == 'Approved by the owning store admin.'
+            && d.get('reportTarget', '') == '' && after.status == 'Approved'
+            && after.approvedBy == request.auth.uid && after.approvedAt == request.time)
+          || (d.action == 'Store reported review' && after.reviewReport.reason == d.reason
+            && after.reviewReport.target == d.reportTarget && after.reviewReport.status == 'pending'
+            && after.reviewReport.reporterUid == request.auth.uid && after.reviewReport.reportedAt == request.time));
+      }
+      allow read: if admin();
+      allow create: if signedIn() && storeReviewAudit();
+    }
+    match /moderationNotifications/{id} {
+      allow read: if admin() || (active() && resource.data.userId == request.auth.uid);
+      allow create: if admin() && reviewModeration(id);
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

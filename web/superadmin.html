@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=5"/>
+<title>Overview | TechKnow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="admin-workspace.css?v=20261109-store-review-approve"/>
+<link rel="stylesheet" href="superadmin.css?v=20261111-review-moderation"/>
+</head>
+<body class="superadmin-workspace" data-auth-portal="superadmin">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<aside class="sidebar" id="admin-sidebar" aria-label="Platform workspace">
+  <div class="sidebar-logo"><div class="logo-mark"><div class="logo-icon"><img src="teamlogo-clean.png" alt="TechKnow logo" /></div></div></div>
+  <div class="workspace-label"><i class="fa fa-shield-halved" aria-hidden="true"></i> Platform workspace</div>
+  <nav class="sidebar-nav" aria-label="Main navigation">
+    <div class="nav-section-label">Workspace</div>
+    <a class="nav-item active" href="#overview"><i class="fa fa-chart-pie"></i><span>Overview</span></a>
+    <a class="nav-item" href="#product-control"><i class="fa fa-boxes-stacked"></i><span>Product Control</span></a>
+    <a class="nav-item" href="#accounts"><i class="fa fa-users"></i><span>Account Management</span></a>
+    <a class="nav-item" href="#permits"><i class="fa fa-file-shield"></i><span>Permits</span></a>
+    <div class="nav-section-label">Oversight</div>
+    <a class="nav-item" href="#reviews"><i class="fa fa-star"></i><span>Review Oversight</span></a>
+    <a class="nav-item" href="#logs"><i class="fa fa-list-check"></i><span>System Logs</span></a>
+  </nav>
+  <div class="sidebar-footer"><div class="admin-card"><div class="admin-avatar">SA</div><div><div class="admin-name">Super Admin</div><div class="admin-role">Platform Administrator</div></div><button type="button" class="admin-logout" aria-label="Sign out" title="Sign out"><i class="fa fa-right-from-bracket" aria-hidden="true"></i></button></div></div>
+</aside>
+
+<main class="main" id="main-content" tabindex="-1">
+  <div class="topbar">
+    <button class="mobile-menu-btn icon-btn" id="mobile-menu-btn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="admin-sidebar"><i class="fa fa-bars" aria-hidden="true"></i></button>
+    <div class="topbar-breadcrumb"><span>Workspace</span><i class="fa fa-chevron-right" aria-hidden="true"></i><div class="topbar-title" id="topbar-title">Overview</div></div>
+    <div class="topbar-actions"><time class="workspace-date" id="workspace-date"></time><button class="icon-btn" type="button" data-section="reviews" aria-label="Open review oversight" title="Review oversight"><i class="fa fa-bell" aria-hidden="true"></i></button></div>
+  </div>
+  <div id="platform-notice" class="superadmin-notice" role="status" hidden></div>
+  <div class="page" id="overview">
+    <div class="page-header"><div><span class="page-eyebrow">YOUR PLATFORM AT A GLANCE</span><h2>Welcome back.</h2><p>A clear view of your shops, accounts, and customer feedback.</p></div><span class="superadmin-badge"><i class="fa fa-shield-halved"></i> Super Admin</span></div>
+    <div class="superadmin-notice"><i class="fa fa-lock"></i><span>Your workspace for reviewing platform activity and keeping every shop accountable.</span></div>
+    <div class="stats-grid superadmin-stats">
+      <button type="button" class="stat-card tone-blue" data-section="product-control"><span class="stat-icon"><i class="fa fa-store" aria-hidden="true"></i></span><span class="stat-label">Total Shops</span><span class="stat-value" id="stat-shops">0</span><span class="stat-hint">Explore shop activity <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span></button>
+      <button type="button" class="stat-card tone-green" data-section="accounts"><span class="stat-icon"><i class="fa fa-users" aria-hidden="true"></i></span><span class="stat-label">Total Users</span><span class="stat-value" id="stat-users">0</span><span class="stat-hint">View all platform accounts <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span></button>
+      <button type="button" class="stat-card tone-violet" data-section="product-control"><span class="stat-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="stat-label">Total Products</span><span class="stat-value" id="stat-products">0</span><span class="stat-hint">Review product usage <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span></button>
+      <button type="button" class="stat-card tone-green" data-section="reviews" data-review-approved="true"><span class="stat-icon"><i class="fa fa-circle-check" aria-hidden="true"></i></span><span class="stat-label">Approved Reviews</span><span class="stat-value" id="stat-approved-reviews">0</span><span class="stat-hint">Manage approved feedback <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span></button>
+      <button type="button" class="stat-card tone-amber" data-section="reviews" data-review-reports="true"><span class="stat-icon"><i class="fa fa-flag" aria-hidden="true"></i></span><span class="stat-label">Store Reports</span><span class="stat-value" id="stat-reported-reviews">0</span><span class="stat-hint">Review pending store reports <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span></button>
+    </div>
+    <div class="sa-two-column overview-panels">
+      <section class="card quick-actions" aria-labelledby="platform-actions-title">
+        <span class="page-eyebrow">MAKE YOUR NEXT MOVE</span><h3 id="platform-actions-title">Keep your platform moving.</h3><p>Your everyday essentials, one click away.</p>
+        <button type="button" class="quick-action" data-section="accounts"><span class="quick-action-icon tone-green"><i class="fa fa-users" aria-hidden="true"></i></span><span><strong>Review accounts</strong><small>See the people and shops on your platform</small></span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        <button type="button" class="quick-action" data-section="permits"><span class="quick-action-icon"><i class="fa fa-file-shield" aria-hidden="true"></i></span><span><strong>View permit submissions</strong><small>Find documents submitted by store admins</small></span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        <button type="button" class="quick-action" data-section="reviews"><span class="quick-action-icon tone-amber"><i class="fa fa-star" aria-hidden="true"></i></span><span><strong>Manage reviews</strong><small>See approved reviews and reports from stores</small></span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+      </section>
+      <section class="card quick-actions" aria-labelledby="platform-controls-title">
+        <span class="page-eyebrow">PLATFORM MANAGEMENT</span><h3 id="platform-controls-title">Everything in its place.</h3><p>Find the policies and activity you need.</p>
+        <button type="button" class="quick-action" data-section="product-control"><span class="quick-action-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span><strong>Review catalog health</strong><small>Find listings that may need attention</small></span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        <button type="button" class="quick-action" data-section="logs"><span class="quick-action-icon"><i class="fa fa-list-check" aria-hidden="true"></i></span><span><strong>View system logs</strong><small>Find the actions recorded in this workspace</small></span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+      </section>
+    </div>
+  </div>
+
+  <div class="page sa-section" id="product-control">
+    <div class="page-header"><div><span class="page-eyebrow">CATALOG OVERSIGHT</span><h2>Product Control</h2><p>Keep store listings clear and reliable so customers can compare products and understand their availability.</p></div><span class="superadmin-badge"><i class="fa fa-scale-balanced"></i> Platform catalog</span></div>
+    <section class="catalog-health-grid" aria-label="Catalog overview">
+      <button class="catalog-health-card active" type="button" data-catalog-filter="all"><span>All listings</span><strong id="catalog-total">0</strong><small>Across all shops</small></button>
+      <button class="catalog-health-card" type="button" data-catalog-filter="visible"><span>Customer-visible</span><strong id="catalog-visible">0</strong><small>Active listings at a resolvable shop</small></button>
+      <button class="catalog-health-card" type="button" data-catalog-filter="archived"><span>Archived</span><strong id="catalog-archived">0</strong><small>Hidden from the customer catalog</small></button>
+      <button class="catalog-health-card" type="button" data-catalog-filter="attention"><span>Needs attention</span><strong id="catalog-attention">0</strong><small>Missing or inconsistent details</small></button>
+    </section>
+    <section class="card sa-panel"><div class="panel-heading"><div><h3>Catalog listings</h3><p>Review listing details and customer visibility. Attention flags describe specific data issues for store follow-up; they do not change a listing.</p></div><div class="catalog-filters"><label>Search listings<input id="catalog-search" type="search" placeholder="Product name" autocomplete="off"></label><label>Shop<select id="catalog-shop-filter"><option value="">All shops</option></select></label><label>Category<select id="catalog-category-filter"><option value="">All categories</option></select></label><label>Listing state<select id="catalog-filter"><option value="all">All listings</option><option value="visible">Customer-visible</option><option value="hidden">Hidden from customers</option><option value="archived">Archived</option><option value="attention">Needs attention</option><option value="available">In stock</option><option value="low-stock">Low stock</option><option value="out-of-stock">Out of stock</option></select></label></div></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Shop</th><th>Category</th><th>Price (PHP)</th><th>Stock</th><th>Listing</th><th>Customer visibility</th><th>Review notes</th></tr></thead><tbody id="platform-products-body"><tr><td colspan="8" class="empty-table">Loading connected records...</td></tr></tbody></table></div></section>
+    <section class="card sa-panel"><div class="panel-heading"><div><h3>Store catalog and limits</h3><p>Compare total, active, archived, and flagged listings by shop. Optional limits apply to product listings, not stock units. Archived listings count toward a limit; lowering it keeps existing products.</p></div></div><div class="table-wrap"><table><thead><tr><th>Shop</th><th>Total listings</th><th>Active</th><th>Archived</th><th>Needs attention</th><th>Listing limit</th><th>Usage</th></tr></thead><tbody id="shop-usage-body"><tr><td colspan="7" class="empty-table">Loading connected records...</td></tr></tbody></table></div></section>
+  </div>
+  <div class="page sa-section" id="accounts">
+    <div class="page-header"><div><span class="page-eyebrow">PEOPLE & SHOPS</span><h2>Account Management</h2><p>Manage user and shop accounts with a recorded reason for every action.</p></div></div>
+    <section class="card sa-panel"><div class="panel-heading"><div><h3>Accounts</h3><p>Active accounts are signed in and using the app or an admin page. Offline accounts are Inactive; connection loss may take up to 95 seconds to appear. Suspend or restore access using the actions below.</p></div><div class="report-filters"><button class="report-filter active">All</button><button class="report-filter">Users</button><button class="report-filter">Shops</button></div></div><div class="table-wrap"><table><thead><tr><th>Account</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="accounts-body"><tr><td colspan="4" class="empty-table">No account records available.</td></tr></tbody></table></div></section>
+
+  </div>
+
+  <div class="page sa-section" id="permits">
+    <div class="page-header"><div><span class="page-eyebrow">STORE DOCUMENTS</span><h2>Permits</h2><p>Business permits and registration documents submitted by store admins.</p></div><span class="superadmin-badge"><i class="fa fa-file-shield" aria-hidden="true"></i> Store verification</span></div>
+    <section class="card sa-panel">
+      <div class="panel-heading"><div><h3>Permit Submissions <span class="section-count" id="permit-count" aria-live="polite">Loading...</span></h3><p>New submissions and status changes appear here automatically.</p></div>
+        <div class="report-filters" aria-label="Filter permit submissions">
+          <button type="button" class="report-filter active" data-permit-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="report-filter" data-permit-filter="pending" aria-pressed="false">Pending</button>
+          <button type="button" class="report-filter" data-permit-filter="approved" aria-pressed="false">Approved</button>
+          <button type="button" class="report-filter" data-permit-filter="rejected" aria-pressed="false">Rejected</button>
+          <button type="button" class="report-filter" data-permit-filter="upload_failed" aria-pressed="false">Upload issues</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Submission</th><th>Shop</th><th>Store Admin</th><th>Documents</th><th>Submitted</th><th>Status</th></tr></thead><tbody id="platform-permits-body"><tr><td colspan="6" class="empty-table">Loading permit submissions...</td></tr></tbody></table></div>
+    </section>
+  </div>
+
+  <div class="page sa-section" id="reviews">
+    <div class="page-header"><div><span class="page-eyebrow">CUSTOMER FEEDBACK</span><h2>Review Oversight</h2><p>Manage approved reviews and reports from store admins.</p></div></div>
+    <section class="card sa-panel"><div class="panel-heading"><div><h3>Approved Reviews and Store Reports</h3><p>Review approved feedback or handle reports from stores.</p></div><div class="report-filters"><button type="button" class="report-filter active">All</button><button type="button" class="report-filter">Approved</button><button type="button" class="report-filter">Reported</button></div></div><div class="table-wrap"><table><thead><tr><th>Review</th><th>Shop</th><th>Author</th><th>Rating</th><th>Status</th><th>Risk</th><th>Store report</th><th>Proof</th><th>Action</th></tr></thead><tbody id="all-reviews-body"><tr><td colspan="9" class="empty-table">Loading connected records...</td></tr></tbody></table></div></section>
+
+  </div>
+
+  <div class="page sa-section" id="logs">
+    <div class="page-header"><div><span class="page-eyebrow">WORKSPACE ACTIVITY</span><h2>System Logs</h2><p>Accountability trail for every Super Admin action.</p></div><button class="btn btn-outline btn-sm" type="button" id="refresh-system-logs"><i class="fa fa-filter-circle-xmark"></i> Refresh Logs</button></div>
+    <section class="card sa-panel"><div class="panel-heading"><div><h3>Audit Trail</h3><p>Latest 200 persisted actions, reasons, targets, and completion states.</p></div></div><div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Action</th><th>Target</th><th>Reason</th><th>Admin</th><th>Status</th></tr></thead><tbody id="logs-body"><tr><td colspan="6" class="empty-table">No system actions recorded.</td></tr></tbody></table></div></section>
+  </div>
+</main>
+
+<dialog id="platform-account-modal" class="account-action-modal" aria-labelledby="account-modal-title" aria-describedby="account-modal-description">
+  <form id="account-action-form" novalidate>
+    <div class="account-modal-heading">
+      <div id="account-modal-icon" class="account-modal-icon" aria-hidden="true"><i class="fa fa-user-lock"></i></div>
+      <button id="account-modal-close" type="button" class="account-modal-close" aria-label="Close account action"><i class="fa fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <h2 id="account-modal-title">Suspend account?</h2>
+    <p id="account-modal-description"></p>
+    <div class="account-modal-target"><strong id="account-modal-name"></strong><span id="account-modal-email"></span></div>
+    <div id="account-modal-fields">
+      <label for="account-modal-reason">Reason <span>(required)</span></label>
+      <textarea id="account-modal-reason" rows="4" maxlength="1000" required aria-describedby="account-modal-help account-modal-error" placeholder="Explain why this account needs this action."></textarea>
+      <p id="account-modal-help" class="account-modal-help">This reason will be saved in the audit trail. Maximum 1,000 characters.</p>
+    </div>
+    <p id="account-modal-error" class="account-modal-error" role="alert" hidden></p>
+    <p id="account-modal-status" class="account-modal-status" role="status" aria-live="polite"></p>
+    <div class="account-modal-actions">
+      <button id="account-modal-cancel" type="button" class="btn btn-outline">Cancel</button>
+      <button id="account-modal-submit" type="submit" class="btn btn-danger">Suspend account</button>
+      <button id="account-modal-done" type="button" class="btn btn-primary" hidden>Done</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="platform-review-modal" class="platform-review-modal" aria-labelledby="platform-review-title">
+  <section class="platform-review-card">
+    <div class="platform-review-heading">
+      <div><span class="page-eyebrow">REVIEW DETAILS</span><h2 id="platform-review-title">Customer review</h2></div>
+      <button type="button" class="btn btn-outline btn-sm" data-review-close>Close</button>
+    </div>
+    <div class="platform-review-body">
+    <div class="platform-review-meta"><strong id="platform-review-author"></strong><span id="platform-review-shop"></span><span id="platform-review-rating"></span></div>
+    <p id="platform-review-text" class="platform-review-text"></p>
+    <div id="platform-review-report" class="platform-review-report" hidden></div>
+    <div class="platform-review-proof"><strong>Purchase proof</strong><img id="platform-review-image" alt="Customer purchase proof" hidden><span id="platform-review-proof-empty">No proof image attached.</span></div>
+    <div class="platform-review-moderation">
+    <label class="platform-review-reason-label" for="platform-review-reason">Reason for action <span aria-hidden="true">*</span></label>
+    <p id="platform-review-help">Warning sends this customer a notice about their rude review. Suspend blocks their account and explains the reason when they sign in.</p>
+    <textarea id="platform-review-reason" rows="3" maxlength="1000" aria-describedby="platform-review-help" placeholder="Explain why this review is rude or inappropriate. The customer will see this reason."></textarea>
+    </div>
+    </div>
+    <footer class="platform-review-footer">
+    <p id="platform-review-action-status" class="platform-review-action-status" role="status" aria-live="polite"></p>
+    <div class="platform-review-actions">
+      <button type="button" class="btn btn-warning" data-platform-review-action="warning"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i> Warning</button>
+      <button type="button" class="btn btn-danger" data-platform-review-action="suspend"><i class="fa fa-user-lock" aria-hidden="true"></i> Suspend</button>
+    </div>
+    </footer>
+  </section>
+</dialog>
+
+<script>
+const sections = ['overview', 'product-control', 'accounts', 'permits', 'reviews', 'logs'];
+function showSection(id) {
+  const selected = sections.includes(id) ? id : 'overview';
+  document.querySelectorAll('.page').forEach(section => section.classList.toggle('active', section.id === selected));
+  document.querySelectorAll('.nav-item[href^="#"]').forEach(item => {
+    const active = item.getAttribute('href') === '#' + selected;
+    item.classList.toggle('active', active);
+    if (active) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
+  });
+  const label = document.querySelector('.nav-item.active span').textContent;
+  document.getElementById('topbar-title').textContent = label;
+  document.title = label + (document.body.dataset.mode === 'preview' ? ' | Preview' : '') + ' | TechKnow';
+  window.closeSuperAdminSidebar?.();
+}
+window.addEventListener('hashchange', () => showSection(location.hash.slice(1)));
+showSection(location.hash.slice(1));
+</script>
+<script src="superadmin-ui.js?v=20261023-workspace"></script>
+<script src="superadmin-account-modal.js?v=20261028-account-modal"></script>
+<script src="superadmin-bootstrap.js?v=20261111-review-moderation"></script>
+</body>
+</html>

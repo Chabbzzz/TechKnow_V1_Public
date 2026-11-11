@@ -1,0 +1,5 @@
+{
+  "functions": [{ "source": "backend/functions", "codebase": "platform-admin", "runtime": "nodejs22",
+    "predeploy": ["node backend/functions/scripts/package-reservation-policy.cjs"] }],
+  "firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" }
+}

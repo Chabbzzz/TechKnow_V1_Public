@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=5" />
+    <title>Create Store Admin Account | TechKnow</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="auth.css" />
+  </head>
+  <body class="signup-page">
+    <main class="auth-shell">
+      <section class="auth-aside">
+        <div>
+          <img class="auth-logo" src="teamlogo-clean.png" alt="TechKnow" />
+          <h1>Put your shop on the map.</h1>
+          <p>
+            Create a Store Admin account and give customers a clearer way to
+            find, compare, and reserve your products.
+          </p>
+          <div class="aside-list">
+            <div>
+              <i class="fa fa-store"></i><span>Build your store presence</span>
+            </div>
+            <div>
+              <i class="fa fa-shield-halved"></i
+              ><span>Keep business details trustworthy</span>
+            </div>
+            <div>
+              <i class="fa fa-users"></i
+              ><span>Serve customers with confidence</span>
+            </div>
+          </div>
+        </div>
+        <small>Store Admin Registration</small>
+      </section>
+      <section class="auth-main">
+        <a class="auth-back" href="landing.html"
+          ><i class="fa fa-arrow-left"></i> Back to TechKnow</a
+        ><span class="auth-kicker"> Store Admin Login</span>
+        <h2>Create your account</h2>
+        <p class="auth-intro">
+          Tell us about your shop. Your address helps customers find the right
+          local store.
+        </p>
+        <form class="auth-form" id="signup-form">
+          <div class="form-row">
+            <div class="field">
+              <label for="admin-name"
+                >Admin name <span class="required">*</span></label
+              ><input
+                id="admin-name"
+                type="text"
+                placeholder="Your full name"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="store-name"
+                >Store name <span class="required">*</span></label
+              ><input
+                id="store-name"
+                type="text"
+                placeholder="Your shop name"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label>Store address <span class="required">*</span></label>
+            <div class="form-row address-row">
+              <div class="field">
+                <label for="barangay-trigger"><span class="address-step">1</span> Barangay <span class="required">*</span></label>
+                <div class="compact-select" data-select="barangay">
+                  <button class="compact-select-trigger" id="barangay-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="barangay-menu">
+                    <span>Select a barangay</span><i class="fa fa-chevron-down" aria-hidden="true"></i>
+                  </button>
+                  <div class="compact-select-menu" id="barangay-menu" role="listbox"></div>
+                  <select id="barangay" name="barangay" required tabindex="-1" aria-hidden="true">
+                    <option value="" selected disabled>Select a barangay</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="street-trigger"><span class="address-step">2</span> Street / subdivision <span class="required">*</span></label>
+                <div class="compact-select" data-select="street">
+                  <button class="compact-select-trigger" id="street-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="street-menu" disabled>
+                    <span>Select a barangay first</span><i class="fa fa-chevron-down" aria-hidden="true"></i>
+                  </button>
+                  <div class="compact-select-menu" id="street-menu" role="listbox"></div>
+                  <select id="street" name="street" required disabled tabindex="-1" aria-hidden="true">
+                    <option value="" selected disabled>Select a barangay first</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="address-details">House / unit details <span class="required">*</span></label>
+              <input
+                id="address-details"
+                name="addressDetails"
+                type="text"
+                placeholder="House number, building, or landmark"
+                required
+              />
+            </div>
+            <input id="address" name="address" type="hidden" />
+            <span class="field-help"
+              >Pin your store location on the map to automatically detect your Barangay and Street. Add your house or unit details, or manually correct the Barangay if needed.
+              </span
+            >
+            <button class="location-button" id="capture-location" type="button"><i class="fa fa-location-crosshairs"></i> Pinpoint this shop's location</button>
+            <div class="location-status" id="location-status"><i class="fa fa-map-pin"></i><span>No location captured yet. Location permission is required for verification.</span></div>
+            <input id="latitude" type="hidden" /><input id="longitude" type="hidden" />
+          </div>
+          <div class="field">
+            <label for="email"
+              >Business email <span class="required">*</span></label
+            ><input
+              id="email"
+              type="email"
+              placeholder="you@yourstore.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="signup-username"
+              >Username <span class="required">*</span></label
+            ><input
+              id="signup-username"
+              type="text"
+              autocomplete="username"
+              placeholder="Choose a username"
+              required
+            />
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="signup-password"
+                >Password <span class="required">*</span></label
+              >
+              <div class="password-wrap">
+                <input
+                  id="signup-password"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Create a password"
+                  required
+                /><button
+                  class="password-toggle"
+                  type="button"
+                  data-target="signup-password"
+                  aria-label="Show password"
+                >
+                  <i class="fa fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="confirm-password"
+                >Confirm password <span class="required">*</span></label
+              >
+              <div class="password-wrap">
+                <input
+                  id="confirm-password"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Repeat password"
+                  required
+                /><button
+                  class="password-toggle"
+                  type="button"
+                  data-target="confirm-password"
+                  aria-label="Show password"
+                >
+                  <i class="fa fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="field-help signup-submit-help" id="signup-submit-help" role="status">
+            Complete all required fields and pinpoint your shop to continue.
+          </div>
+          <button class="auth-submit" type="submit" disabled aria-describedby="signup-submit-help">
+            Continue to Permit Submission <i class="fa fa-arrow-right"></i>
+          </button>
+          <div class="notice" id="signup-notice">
+            Complete your store details to continue to permit submission.
+          </div>
+        </form>
+        <p class="auth-switch">
+          Already have an account? <a href="login.html">Log in here</a>
+        </p>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-storage-compat.js"></script>
+    <script src="../backend/config/firebase-config.js"></script>
+    <script src="firebase-config.js?v=20261023"></script>
+    <script src="../backend/services/presence.js"></script>
+    <script src="presence.js"></script>
+    <script src="bacolod-addresses.js"></script>
+    <script>
+      const barangaySelect = document.getElementById("barangay");
+      const streetSelect = document.getElementById("street");
+      const addressDetails = document.getElementById("address-details");
+      const addressInput = document.getElementById("address");
+      const captureLocationButton = document.getElementById("capture-location");
+      const locationLookup = {
+        timer: null,
+        controller: null,
+        requestId: 0,
+      };
+
+      Object.keys(BACOLOD_STREETS_BY_BARANGAY).forEach((barangay) => {
+        const option = document.createElement("option");
+        option.value = barangay;
+        option.textContent = barangay;
+        barangaySelect.appendChild(option);
+      });
+
+      function createCompactDropdown(select) {
+        const wrapper = document.querySelector(`[data-select="${select.id}"]`);
+        const trigger = wrapper.querySelector(".compact-select-trigger");
+        const triggerLabel = trigger.querySelector("span");
+        const menu = wrapper.querySelector(".compact-select-menu");
+
+        function close() {
+          wrapper.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+        }
+
+        function render() {
+          const selectedOption = select.options[select.selectedIndex];
+          triggerLabel.textContent = selectedOption
+            ? selectedOption.textContent
+            : "Select an option";
+          trigger.disabled = select.disabled;
+          menu.innerHTML = "";
+
+          Array.from(select.options).forEach((option) => {
+            if (!option.value || option.disabled) return;
+
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "compact-select-option";
+            item.setAttribute("role", "option");
+            item.setAttribute("aria-selected", option.selected ? "true" : "false");
+            item.textContent = option.textContent;
+            item.addEventListener("click", () => {
+              select.value = option.value;
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+              close();
+            });
+            menu.appendChild(item);
+          });
+        }
+
+        trigger.addEventListener("click", () => {
+          if (trigger.disabled) return;
+          const willOpen = !wrapper.classList.contains("is-open");
+          document.querySelectorAll(".compact-select.is-open").forEach((openWrapper) => {
+            openWrapper.classList.remove("is-open");
+            openWrapper.querySelector(".compact-select-trigger").setAttribute("aria-expanded", "false");
+          });
+          wrapper.classList.toggle("is-open", willOpen);
+          trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!wrapper.contains(event.target)) close();
+        });
+        select.addEventListener("change", render);
+        render();
+        return { render };
+      }
+
+      const barangayDropdown = createCompactDropdown(barangaySelect);
+      const streetDropdown = createCompactDropdown(streetSelect);
+
+      function normalizeAddressPart(value) {
+        return String(value || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\bbrgy\b/g, "barangay")
+          .replace(/\bst\b/g, "street")
+          .replace(/\brd\b/g, "road")
+          .replace(/\bave?\b/g, "avenue")
+          .replace(/\bhwy\b/g, "highway")
+          .replace(/\bext\b/g, "extension")
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim();
+      }
+
+      function findBarangay(address) {
+        const barangays = Object.keys(BACOLOD_STREETS_BY_BARANGAY);
+        const candidates = [
+          address.barangay,
+          address.suburb,
+          address.neighbourhood,
+          address.quarter,
+          address.village,
+          address.city_district,
+        ].filter(Boolean);
+
+        for (const candidate of candidates) {
+          const normalizedCandidate = normalizeAddressPart(candidate);
+          const withoutPrefix = normalizedCandidate.replace(/^barangay\s+/, "");
+          const exactMatch = barangays.find((barangay) => {
+            const normalizedBarangay = normalizeAddressPart(barangay);
+            return (
+              normalizedBarangay === normalizedCandidate ||
+              normalizedBarangay.replace(/^barangay\s+/, "") === withoutPrefix
+            );
+          });
+          if (exactMatch) return exactMatch;
+        }
+
+        return "";
+      }
+
+      function findMatchingOption(select, value) {
+        const normalizedValue = normalizeAddressPart(value);
+        if (!normalizedValue) return null;
+
+        const options = Array.from(select.options).filter(
+          (option) => option.value && !option.disabled,
+        );
+        return (
+          options.find(
+            (option) => normalizeAddressPart(option.textContent) === normalizedValue,
+          ) ||
+          options.find((option) => {
+            const normalizedOption = normalizeAddressPart(option.textContent);
+            return (
+              normalizedOption.length > 5 &&
+              (normalizedOption.includes(normalizedValue) ||
+                normalizedValue.includes(normalizedOption))
+            );
+          }) ||
+          null
+        );
+      }
+
+      function chooseAddressOption(select, value, dropdown, addMapResult = false) {
+        if (!value) return false;
+
+        let option = findMatchingOption(select, value);
+        if (!option && addMapResult) {
+          option = document.createElement("option");
+          option.value = value;
+          option.textContent = `${value} (map result)`;
+          select.appendChild(option);
+        }
+        if (!option) return false;
+
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        dropdown.render();
+        return true;
+      }
+
+      function getReverseGeocodeStreet(address) {
+        return (
+          address.road ||
+          address.street ||
+          address.pedestrian ||
+          address.residential ||
+          address.path ||
+          ""
+        );
+      }
+
+      function getReverseGeocodeDetails(address) {
+        return [
+          address.unit,
+          address.house_number,
+          address.building,
+          address.house_name,
+        ]
+          .filter(Boolean)
+          .filter((value, index, values) => values.indexOf(value) === index)
+          .join(", ");
+      }
+
+      function queueAddressLookup(latitude, longitude) {
+        clearTimeout(locationLookup.timer);
+        locationLookup.controller?.abort();
+        const requestId = ++locationLookup.requestId;
+        locationLookup.timer = setTimeout(() => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+          locationLookup.controller = controller;
+          fillAddressFromLocation(
+            latitude,
+            longitude,
+            controller.signal,
+            requestId,
+          ).finally(() => {
+            clearTimeout(timeoutId);
+            if (locationLookup.controller === controller) {
+              locationLookup.controller = null;
+            }
+          });
+        }, 450);
+      }
+
+      async function fillAddressFromLocation(
+        latitude,
+        longitude,
+        signal,
+        requestId,
+      ) {
+        const status = document.getElementById("location-status");
+        const message = status.querySelector("span");
+        const query = new URLSearchParams({
+          format: "jsonv2",
+          addressdetails: "1",
+          zoom: "18",
+          layer: "address",
+          lat: latitude,
+          lon: longitude,
+        });
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?${query.toString()}`,
+            { headers: { Accept: "application/json" }, signal },
+          );
+          if (!response.ok) throw new Error("Address lookup failed");
+
+          const result = await response.json();
+          if (requestId !== locationLookup.requestId) return;
+          const address = result.address || {};
+          const locationText = [result.display_name, ...Object.values(address)]
+            .filter(Boolean)
+            .join(" ");
+          if (!/bacolod/i.test(locationText)) {
+            throw new Error("The pinned location is outside Bacolod City");
+          }
+
+          const barangay = findBarangay(address);
+          const street = getReverseGeocodeStreet(address);
+          const details = getReverseGeocodeDetails(address);
+          const matchedBarangay = chooseAddressOption(
+            barangaySelect,
+            barangay,
+            barangayDropdown,
+          );
+          const matchedStreet = matchedBarangay
+            ? chooseAddressOption(streetSelect, street, streetDropdown, true)
+            : false;
+
+          if (details) addressDetails.value = details;
+          updateAddressValue();
+          status.classList.remove("location-error");
+          status.classList.add("location-success");
+
+          if (matchedBarangay && matchedStreet) {
+            message.textContent = details
+              ? `Address filled from your pin: ${details}, ${street}, ${barangay}. Please verify it.`
+              : `Barangay and street filled from your pin: ${street}, ${barangay}. Add house or unit details if needed.`;
+          } else {
+            message.textContent =
+              "Location captured, but the map could not match the barangay or street. Please select the address manually.";
+          }
+          updateSignupReadiness();
+        } catch (error) {
+          if (error.name === "AbortError" || requestId !== locationLookup.requestId) {
+            return;
+          }
+          status.classList.remove("location-success");
+          status.classList.add("location-error");
+          message.textContent =
+            error.message === "The pinned location is outside Bacolod City"
+              ? error.message + ". Please pin a shop within Bacolod City."
+              : "Location captured, but the address lookup is unavailable. Please enter the address manually.";
+        }
+      }
+
+      function updateAddressValue() {
+        const parts = [
+          addressDetails.value.trim(),
+          streetSelect.value,
+          barangaySelect.value,
+          "Bacolod City",
+        ].filter(Boolean);
+        addressInput.value = parts.join(", ");
+        return addressInput.value;
+      }
+
+      function populateStreetOptions(barangay) {
+        const streets = BACOLOD_STREETS_BY_BARANGAY[barangay] || [];
+        streetSelect.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = streets.length
+          ? "Select a street or subdivision"
+          : "No street records available";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        streetSelect.appendChild(placeholder);
+
+        streets.forEach((street) => {
+          const option = document.createElement("option");
+          option.value = street;
+          option.textContent = street;
+          streetSelect.appendChild(option);
+        });
+
+        streetSelect.disabled = streets.length === 0;
+        streetDropdown.render();
+        updateAddressValue();
+      }
+
+      barangaySelect.addEventListener("change", () => {
+        populateStreetOptions(barangaySelect.value);
+      });
+      streetSelect.addEventListener("change", updateAddressValue);
+      addressDetails.addEventListener("input", updateAddressValue);
+
+      document.querySelectorAll(".password-toggle").forEach((b) =>
+        b.addEventListener("click", () => {
+          const i = document.getElementById(b.dataset.target);
+          const show = i.type === "password";
+          i.type = show ? "text" : "password";
+          b.innerHTML = show
+            ? '<i class="fa fa-eye-slash"></i>'
+            : '<i class="fa fa-eye"></i>';
+        }),
+      );
+      captureLocationButton.addEventListener("click", () => {
+        const status = document.getElementById("location-status");
+        const message = status.querySelector("span");
+
+        if (captureLocationButton.disabled) return;
+        if (!navigator.geolocation) {
+          status.classList.add("location-error");
+          message.textContent = "Location services are not supported by this browser.";
+          return;
+        }
+
+        status.classList.remove("location-error", "location-success");
+        message.textContent = "Requesting your shop location...";
+        captureLocationButton.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            document.getElementById("latitude").value = latitude;
+            document.getElementById("longitude").value = longitude;
+            captureLocationButton.disabled = false;
+            status.classList.add("location-success");
+            message.textContent = "Location captured. Looking up the Bacolod address...";
+            updateSignupReadiness();
+            queueAddressLookup(latitude, longitude);
+          },
+          () => {
+            captureLocationButton.disabled = false;
+            status.classList.add("location-error");
+            message.textContent = "Location access was not provided. Allow permission and try again.";
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+        );
+      });
+      const signupForm = document.getElementById("signup-form");
+      const signupButton = signupForm.querySelector("button[type=submit]");
+      const signupNotice = document.getElementById("signup-notice");
+      const signupSubmitHelp = document.getElementById("signup-submit-help");
+
+      function isSignupReady() {
+        const latitudeValue = document.getElementById("latitude").value.trim();
+        const longitudeValue = document.getElementById("longitude").value.trim();
+        const latitude = Number(latitudeValue);
+        const longitude = Number(longitudeValue);
+        const password = document.getElementById("signup-password").value;
+        const username = document.getElementById("signup-username").value.trim();
+        return Boolean(
+          document.getElementById("admin-name").value.trim()
+          && document.getElementById("store-name").value.trim()
+          && document.getElementById("email").validity.valid
+          && barangaySelect.value
+          && streetSelect.value
+          && addressDetails.value.trim()
+          && /^[a-zA-Z0-9._-]{3,40}$/.test(username)
+          && password.length >= 6
+          && document.getElementById("confirm-password").value === password
+          && latitudeValue !== ""
+          && longitudeValue !== ""
+          && Number.isFinite(latitude) && latitude >= -90 && latitude <= 90
+          && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180
+        );
+      }
+
+      function updateSignupReadiness() {
+        const ready = isSignupReady();
+        signupButton.disabled = !ready;
+        signupSubmitHelp.textContent = ready
+          ? "All required details are complete. You can continue to permit submission."
+          : "Complete all required fields, enter matching passwords, and pinpoint your shop to continue.";
+      }
+
+      signupForm.addEventListener("input", updateSignupReadiness);
+      signupForm.addEventListener("change", updateSignupReadiness);
+      updateSignupReadiness();
+
+      function showSignupNotice(message, isError = false) {
+        signupNotice.textContent = message;
+        signupNotice.style.background = isError ? "#fff5f5" : "#f0fdf4";
+        signupNotice.style.color = isError ? "var(--danger)" : "var(--green)";
+        signupNotice.classList.add("show");
+      }
+
+      function getSignupErrorMessage(error) {
+        const messages = {
+          "auth/email-already-in-use": "An account already exists for this business email.",
+          "auth/invalid-email": "Enter a valid business email address.",
+          "auth/weak-password": "Use a stronger password with at least 6 characters.",
+          "auth/network-request-failed": "The connection failed. Check your internet and try again.",
+          "permission-denied": "That username may already be in use, or the registration could not be saved. Check the details and try again.",
+        };
+        return messages[error.code] || "Unable to create your account right now. Please try again.";
+      }
+
+      signupForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const password = document.getElementById("signup-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const address = updateAddressValue();
+        const locationStatus = document.getElementById("location-status");
+        const adminName = document.getElementById("admin-name").value.trim();
+        const storeName = document.getElementById("store-name").value.trim();
+        const email = document.getElementById("email").value.trim().toLowerCase();
+        const username = document.getElementById("signup-username").value.trim();
+        const latitude = Number(document.getElementById("latitude").value);
+        const longitude = Number(document.getElementById("longitude").value);
+
+        if (!address || !barangaySelect.value || !streetSelect.value || !addressDetails.value.trim()) {
+          showSignupNotice("Please complete the Bacolod City barangay, street, and house or unit details.", true);
+          return;
+        }
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+          locationStatus.classList.add("location-error");
+          locationStatus.querySelector("span").textContent =
+            "Please pinpoint your shop location before submitting your registration.";
+          return;
+        }
+        if (password !== confirmPassword) {
+          showSignupNotice("Passwords do not match. Please check both fields.", true);
+          return;
+        }
+        if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
+          showSignupNotice("Use 3–40 letters, numbers, dots, underscores, or hyphens for your username.", true);
+          return;
+        }
+
+        signupButton.disabled = true;
+        signupButton.innerHTML = 'Saving account... <i class="fa fa-spinner fa-spin"></i>';
+        signupNotice.classList.remove("show");
+
+        let signupUser = null;
+        let signupRecordsSaved = false;
+        try {
+          const { auth, db, persistenceReady, serverTimestamp } = window.techKnowFirebase;
+          await persistenceReady;
+          const credential = await auth.createUserWithEmailAndPassword(email, password);
+          signupUser = credential.user;
+          await credential.user.updateProfile({ displayName: adminName });
+
+          const userData = {
+            uid: credential.user.uid,
+            fullName: adminName,
+            email,
+            username,
+            usernameLower: username.toLowerCase(),
+            role: "Store Admin",
+            status: "Pending Verification",
+            storeId: credential.user.uid,
+            storeName,
+            address,
+            latitude,
+            longitude,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+          const storeData = {
+            id: credential.user.uid,
+            ownerId: credential.user.uid,
+            ownerUid: credential.user.uid,
+            adminName,
+            email,
+            username,
+            name: storeName,
+            storeName,
+            address,
+            latitude,
+            longitude,
+            status: "Pending Verification",
+            verificationStatus: "pending",
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+          const directoryData = {
+            id: credential.user.uid,
+            name: storeName,
+            address,
+            latitude,
+            longitude,
+            status: "Pending Verification",
+            verificationStatus: "pending",
+            updatedAt: serverTimestamp(),
+          };
+          const batch = db.batch();
+          batch.set(db.collection("users").doc(credential.user.uid), userData, { merge: true });
+          batch.set(db.collection("stores").doc(credential.user.uid), storeData, { merge: true });
+          batch.set(db.collection("storeDirectory").doc(credential.user.uid), directoryData);
+          batch.set(db.collection("usernames").doc(username.toLowerCase()), {
+            uid: credential.user.uid,
+            username,
+          });
+          await batch.commit();
+          signupRecordsSaved = true;
+
+          try {
+            sessionStorage.setItem(
+              "techknowSignupDraft",
+              JSON.stringify({
+                uid: credential.user.uid,
+                adminName,
+                storeName,
+                email,
+                username,
+                address,
+                latitude,
+                longitude,
+              }),
+            );
+          } catch (storageError) {
+            console.warn("Store signup continuation details could not be saved", storageError);
+          }
+          window.location.href = "permit-submission.html";
+        } catch (error) {
+          console.error("Store signup failed", error);
+          if (signupUser && !signupRecordsSaved) {
+            await signupUser.delete().catch((cleanupError) => {
+              console.error("Incomplete store signup account cleanup failed", cleanupError);
+            });
+          }
+          showSignupNotice(getSignupErrorMessage(error), true);
+          updateSignupReadiness();
+          signupButton.innerHTML = 'Continue to Permit Submission <i class="fa fa-arrow-right"></i>';
+        }
+      });
+    </script>
+  </body>
+</html>

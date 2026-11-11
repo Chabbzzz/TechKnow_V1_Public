@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=5" />
+    <title>Submit Store Permits | TechKnow</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="auth.css" />
+  </head>
+  <body class="permit-page">
+    <main class="auth-shell permit-shell">
+      <section class="auth-aside">
+        <div>
+          <img class="auth-logo" src="teamlogo-clean.png" alt="TechKnow" />
+          <h1>One step closer to going live.</h1>
+          <p>
+            Submit one private document so TechKnow administrators can verify
+            your store and keep the marketplace trustworthy.
+          </p>
+          <div class="aside-list">
+            <div>
+              <i class="fa fa-file-shield"></i><span>Organize your permits</span>
+            </div>
+            <div>
+              <i class="fa fa-building-circle-check"></i
+              ><span>Support small and large stores</span>
+            </div>
+            <div>
+              <i class="fa fa-lock"></i><span>Keep documents for review</span>
+            </div>
+          </div>
+        </div>
+        <small>Store Verification</small>
+      </section>
+
+      <section class="auth-main permit-main">
+        <a class="auth-back" href="signup.html"
+          ><i class="fa fa-arrow-left"></i> Back to store details</a
+        >
+        <div class="permit-progress" aria-label="Signup progress">
+          <span><i class="fa fa-check"></i> Store details</span>
+          <span class="active"><i class="fa fa-2"></i> Permit submission</span>
+        </div>
+        <span class="auth-kicker">Complete your signup</span>
+        <h2>Verify your store</h2>
+        <p class="auth-intro">
+          Upload one clear verification document for admin review.
+        </p>
+
+        <div class="permit-summary" id="store-summary">
+          <i class="fa fa-store"></i>
+          <div>
+            <strong>Store details from step 1</strong>
+            <span>Loading your saved store information...</span>
+          </div>
+        </div>
+
+        <form class="permit-form" id="permit-form">
+          <section class="permit-section verification-section">
+            <div class="permit-section-heading">
+              <div>
+                <span class="permit-eyebrow">Required verification document</span>
+                <h3>Mayor’s Business Permit or DTI/SEC Registration</h3>
+              </div>
+              <span class="permit-required-badge">Required</span>
+            </div>
+            <div class="privacy-callout" role="note">
+              <i class="fa fa-shield-halved"></i>
+              <div>
+                <strong>Your document stays private</strong>
+                <span>
+                  Uploads are strictly private for TechKnow admin verification
+                  and will never be publicly displayed on your store profile.
+                </span>
+              </div>
+            </div>
+            <div class="verification-drop-zone" id="verification-drop-zone" tabindex="0" role="button" aria-controls="verification-file-input" aria-label="Upload Mayor’s Permit or DTI/SEC Registration">
+              <input id="verification-file-input" type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" multiple />
+              <span class="drop-zone-icon"><i class="fa fa-cloud-arrow-up"></i></span>
+              <strong>Drag and drop your document here</strong>
+              <span>or click to browse · JPG, PNG, or PDF · up to 10 MB per file</span>
+            </div>
+            <div class="upload-error" id="verification-file-error" role="alert" aria-live="polite"></div>
+            <div class="verification-file-list" id="verification-file-list"></div>
+            <p class="watermark-note">
+              <i class="fa fa-stamp"></i>
+              Please upload a clear copy. You may overlay the watermark
+              <strong>“FOR TECHKNOW VERIFICATION ONLY”</strong> before uploading.
+            </p>
+          </section>
+
+          <button class="auth-submit permit-submit" type="submit" id="permit-submit">
+            Submit Permit Package <i class="fa fa-arrow-right"></i>
+          </button>
+          <div class="notice" id="permit-notice" role="status"></div>
+          <p class="permit-demo-note permit-fraud-notice" role="alert">
+            <i class="fa fa-triangle-exclamation"></i>
+            <span>
+              <strong>Important:</strong> Do not submit fake, altered, or
+              fraudulent permits. TechKnow may reject the application, suspend
+              the store account, and report suspected fraud for review.
+            </span>
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-storage-compat.js"></script>
+    <script src="../backend/config/firebase-config.js"></script>
+    <script src="firebase-config.js?v=20261023"></script>
+    <script src="../backend/services/presence.js"></script>
+    <script src="presence.js"></script>
+    <script src="../backend/services/permits.js"></script>
+    <script>
+      const permitCatalog = [
+        {
+          id: "business-registration",
+          group: "Core documents",
+          title: "Business name or entity registration",
+          agency: "DTI / SEC / CDA",
+          applies: "DTI for sole proprietorship; SEC for corporation, partnership, association, or OPC; CDA for cooperative.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "barangay-clearance",
+          group: "Core documents",
+          title: "Barangay business clearance",
+          agency: "Barangay office",
+          applies: "Common local clearance for a store operating in Bacolod City.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "mayors-business-permit",
+          group: "Core documents",
+          title: "Mayor's / business permit",
+          agency: "Bacolod BPLO",
+          applies: "The city business permit application and issued permit, when already available.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "proof-of-premises",
+          group: "Core documents",
+          title: "Proof of business premises",
+          agency: "Owner / lessor",
+          applies: "Notarized lease, proof of ownership, or the applicable affidavit of non-rental.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "bir-registration",
+          group: "Core documents",
+          title: "BIR Certificate of Registration / Form 2303",
+          agency: "Bureau of Internal Revenue",
+          applies: "Tax registration and certificate for the business or branch, when issued.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "zoning-clearance",
+          group: "Core documents",
+          title: "Zoning or locational clearance",
+          agency: "Bacolod CPDO / Zoning",
+          applies: "Confirms the activity is allowed at the declared location.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "fire-safety-inspection",
+          group: "Core documents",
+          title: "Fire Safety Inspection Certificate (FSIC)",
+          agency: "Bureau of Fire Protection",
+          applies: "For business permit or occupancy requirements, depending on the premises.",
+          scale: "both",
+          badge: "Core",
+        },
+        {
+          id: "health-sanitary-clearance",
+          group: "Core documents",
+          title: "City Health clearance / sanitary permit",
+          agency: "Bacolod City Health Office",
+          applies: "Especially relevant to food, personal-care, health, and other regulated activities.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "enro-clearance",
+          group: "Core documents",
+          title: "ENRO environmental clearance",
+          agency: "Bacolod ENRO / DENR, when applicable",
+          applies: "May depend on the activity, waste, emissions, location, or size of the operation.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "land-tax-clearance",
+          group: "Core documents",
+          title: "Land tax or real-property clearance",
+          agency: "City Treasurer / Assessor",
+          applies: "May be requested as part of the city business-permit process or premises review.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "annual-safety-inspection",
+          group: "Small / neighborhood stores",
+          title: "Annual safety inspection or applicable exemption proof",
+          agency: "Bacolod OBO",
+          applies: "For premises that need annual inspection; some residential, stall, kiosk, or movable setups may have different treatment.",
+          scale: "small",
+          badge: "Small",
+        },
+        {
+          id: "market-clearance",
+          group: "Small / neighborhood stores",
+          title: "Market administration clearance",
+          agency: "City Administrator / market office",
+          applies: "For stores, stalls, or kiosks inside a public or major market, when required.",
+          scale: "small",
+          badge: "Conditional",
+        },
+        {
+          id: "occupancy-permit",
+          group: "Large / commercial premises",
+          title: "Certificate of occupancy",
+          agency: "Bacolod OBO",
+          applies: "For a newly constructed, altered, expanded, or commercial building when required.",
+          scale: "large",
+          badge: "Large",
+        },
+        {
+          id: "building-permit",
+          group: "Large / commercial premises",
+          title: "Building permit and approved plans",
+          agency: "Bacolod OBO",
+          applies: "For new construction, renovation, expansion, or structural work.",
+          scale: "large",
+          badge: "Large",
+        },
+        {
+          id: "electrical-permit",
+          group: "Large / commercial premises",
+          title: "Electrical permit",
+          agency: "Bacolod OBO",
+          applies: "For applicable electrical installation, new connection, separate meter, or alteration work.",
+          scale: "large",
+          badge: "Conditional",
+        },
+        {
+          id: "plumbing-sanitary-permit",
+          group: "Large / commercial premises",
+          title: "Plumbing or sanitary permit",
+          agency: "Bacolod OBO",
+          applies: "For applicable plumbing, water, drainage, or sanitary installations.",
+          scale: "large",
+          badge: "Conditional",
+        },
+        {
+          id: "mechanical-permit",
+          group: "Large / commercial premises",
+          title: "Mechanical permit",
+          agency: "Bacolod OBO",
+          applies: "For applicable mechanical systems, equipment, or installations.",
+          scale: "large",
+          badge: "Conditional",
+        },
+        {
+          id: "construction-completion",
+          group: "Large / commercial premises",
+          title: "Certificate of completion and as-built plans",
+          agency: "Licensed professional / OBO",
+          applies: "For completed construction or changes that require occupancy review.",
+          scale: "large",
+          badge: "Conditional",
+        },
+        {
+          id: "dole-clearance",
+          group: "Large / commercial premises",
+          title: "DOLE or workplace compliance clearance",
+          agency: "Department of Labor and Employment",
+          applies: "When required by the workplace, construction, staffing, or business activity.",
+          scale: "large",
+          badge: "Conditional",
+        },
+        {
+          id: "food-handler-health-certificates",
+          group: "Activity-based permits",
+          title: "Food-handler health certificates",
+          agency: "Local Health Office",
+          applies: "For employees handling, preparing, serving, or selling food or drinks.",
+          scale: "both",
+          badge: "Food",
+        },
+        {
+          id: "fda-food-lto",
+          group: "Activity-based permits",
+          title: "FDA License to Operate for food products",
+          agency: "Food and Drug Administration",
+          applies: "For applicable food manufacturers, traders, distributors, importers, exporters, or other regulated food establishments.",
+          scale: "both",
+          badge: "Food",
+        },
+        {
+          id: "fda-regulated-products",
+          group: "Activity-based permits",
+          title: "FDA license or product authorization",
+          agency: "Food and Drug Administration",
+          applies: "For applicable drugs, cosmetics, medical devices, household hazardous substances, toys, child-care articles, or similar regulated products.",
+          scale: "both",
+          badge: "Regulated",
+        },
+        {
+          id: "veterinary-clearance",
+          group: "Activity-based permits",
+          title: "Meat and poultry clearance",
+          agency: "Bacolod City Veterinary Office",
+          applies: "For stores handling or selling meat, poultry, or related products.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "agriculture-clearance",
+          group: "Activity-based permits",
+          title: "Agriculture-related clearance",
+          agency: "City Agriculture Office",
+          applies: "For agricultural products, farms, and agriculture-related businesses when required.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "tourism-clearance",
+          group: "Activity-based permits",
+          title: "Tourism-related clearance",
+          agency: "City Tourism Office",
+          applies: "For tourism-related establishments and activities when required.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "cooperative-clearance",
+          group: "Activity-based permits",
+          title: "Cooperative clearance",
+          agency: "City Cooperatives and Livelihood Development Office",
+          applies: "For cooperatives and cooperative-related businesses when required.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "franchise-dealership-ipo",
+          group: "Activity-based permits",
+          title: "Franchise, dealership, or IPO registration",
+          agency: "Franchisor / dealer / IPO, when applicable",
+          applies: "For businesses using another company’s trade name, franchise, dealership, or protected brand.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "liquor-permit",
+          group: "Activity-based permits",
+          title: "Liquor or alcoholic beverage permit",
+          agency: "City licensing office, when applicable",
+          applies: "For stores selling or serving alcoholic beverages; verify the current local requirements.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "signage-permit",
+          group: "Activity-based permits",
+          title: "Signage or advertising permit",
+          agency: "City licensing office, when applicable",
+          applies: "For exterior signs, billboards, or advertising displays subject to local rules.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "weights-measures",
+          group: "Activity-based permits",
+          title: "Weights and measures calibration/sealing",
+          agency: "City licensing office / market office",
+          applies: "For stores using weighing scales or measuring devices in trade.",
+          scale: "both",
+          badge: "Conditional",
+        },
+        {
+          id: "other-agency-clearance",
+          group: "Activity-based permits",
+          title: "Other agency or special clearance",
+          agency: "As required by the business activity",
+          applies: "Use this slot for a permit or clearance requested by the reviewing office that is not listed above.",
+          scale: "both",
+          badge: "Other",
+        },
+      ];
+
+      const permitList = document.getElementById("permit-list");
+      const fileCount = document.getElementById("file-count");
+      const permitNotice = document.getElementById("permit-notice");
+      const permitSubmit = document.getElementById("permit-submit");
+      let activePermitCategory = "core";
+      const MAX_VERIFICATION_FILE_SIZE = 10 * 1024 * 1024;
+      const verificationFileInput = document.getElementById("verification-file-input");
+      const verificationDropZone = document.getElementById("verification-drop-zone");
+      const verificationFileList = document.getElementById("verification-file-list");
+      const verificationFileError = document.getElementById("verification-file-error");
+      let verificationFiles = [];
+      let verificationPreviewUrls = [];
+
+      function readSignupDraft() {
+        try {
+          return JSON.parse(sessionStorage.getItem("techknowSignupDraft") || "null");
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      }
+
+      function persistPermitState() {
+        try {
+          sessionStorage.setItem(
+            "techknowPermitState",
+            JSON.stringify({
+              storeScale: document.querySelector("input[name=storeScale]:checked")?.value || "small",
+              activeCategory: activePermitCategory,
+              selectedPermitIds: Array.from(
+                document.querySelectorAll("input[name=permitTypes]:checked"),
+              ).map((input) => input.value),
+              verificationFiles: verificationFiles.map((file) => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+              })),
+            }),
+          );
+        } catch (error) {
+          // Session storage is optional; the current in-memory state still works.
+        }
+      }
+
+      function readPermitState() {
+        try {
+          return JSON.parse(sessionStorage.getItem("techknowPermitState") || "null");
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function renderVerificationFiles() {
+        verificationPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+        verificationPreviewUrls = [];
+        verificationFileList.replaceChildren();
+
+        verificationFiles.forEach((file, index) => {
+          const item = document.createElement("article");
+          item.className = "verification-file-preview";
+          const preview = document.createElement("div");
+          preview.className = "verification-file-thumbnail";
+          const details = document.createElement("div");
+          details.className = "verification-file-details";
+          const name = document.createElement("strong");
+          const meta = document.createElement("span");
+          const remove = document.createElement("button");
+
+          name.textContent = file.name;
+          meta.textContent = `${formatFileSize(file.size)} · ${file.type === "application/pdf" ? "PDF document" : "Image"}`;
+          remove.type = "button";
+          remove.className = "verification-file-remove";
+          remove.setAttribute("aria-label", `Remove ${file.name}`);
+          remove.innerHTML = '<i class="fa fa-xmark"></i>';
+          remove.addEventListener("click", () => {
+            verificationFiles.splice(index, 1);
+            renderVerificationFiles();
+            persistPermitState();
+          });
+
+          if (file.type === "application/pdf") {
+            preview.innerHTML = '<i class="fa fa-file-pdf"></i>';
+            preview.classList.add("is-pdf");
+          } else {
+            const image = document.createElement("img");
+            const imageUrl = URL.createObjectURL(file);
+            verificationPreviewUrls.push(imageUrl);
+            image.src = imageUrl;
+            image.alt = `Preview of ${file.name}`;
+            preview.appendChild(image);
+          }
+          details.append(name, meta);
+          item.append(preview, details, remove);
+          verificationFileList.appendChild(item);
+        });
+      }
+
+      function addVerificationFiles(fileList) {
+        const errors = [];
+        Array.from(fileList || []).forEach((file) => {
+          const extensionAllowed = /\.(jpe?g|png|pdf)$/i.test(file.name);
+          const typeAllowed = ["image/jpeg", "image/png", "application/pdf"].includes(file.type);
+          if (!extensionAllowed || (file.type && !typeAllowed)) {
+            errors.push(`${file.name}: use JPG, PNG, or PDF.`);
+            return;
+          }
+          if (file.size > MAX_VERIFICATION_FILE_SIZE) {
+            errors.push(`${file.name}: file must be 10 MB or smaller.`);
+            return;
+          }
+          const duplicate = verificationFiles.some(
+            (existing) =>
+              existing.name === file.name &&
+              existing.size === file.size &&
+              existing.lastModified === file.lastModified,
+          );
+          if (!duplicate) verificationFiles.push(file);
+        });
+
+        verificationFileError.textContent = errors.join(" ");
+        verificationDropZone.classList.toggle("has-error", errors.length > 0);
+        renderVerificationFiles();
+        persistPermitState();
+        verificationFileInput.value = "";
+      }
+
+      verificationDropZone.addEventListener("click", (event) => {
+        if (event.target !== verificationFileInput) verificationFileInput.click();
+      });
+      verificationDropZone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          verificationFileInput.click();
+        }
+      });
+      verificationFileInput.addEventListener("change", () => {
+        addVerificationFiles(verificationFileInput.files);
+      });
+      ["dragenter", "dragover"].forEach((eventName) => {
+        verificationDropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          verificationDropZone.classList.add("is-dragging");
+        });
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        verificationDropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          verificationDropZone.classList.remove("is-dragging");
+        });
+      });
+      verificationDropZone.addEventListener("drop", (event) => {
+        addVerificationFiles(event.dataTransfer.files);
+      });
+
+      function renderStoreSummary() {
+        const draft = readSignupDraft();
+        const summary = document.getElementById("store-summary");
+        summary.replaceChildren();
+        const icon = document.createElement("i");
+        const content = document.createElement("div");
+        const title = document.createElement("strong");
+        const address = document.createElement("span");
+        if (!draft) {
+          icon.className = "fa fa-triangle-exclamation";
+          title.textContent = "No saved store draft found";
+          address.textContent =
+            "Go back to store details if you need to start the signup again.";
+          content.append(title, address);
+          summary.append(icon, content);
+          return;
+        }
+        icon.className = "fa fa-store";
+        title.textContent = draft.storeName || "Your store";
+        address.textContent = draft.address || "Bacolod City address";
+        content.append(title, address);
+        summary.append(icon, content);
+      }
+
+      function createPermitCard(permit) {
+        const card = document.createElement("article");
+        card.className = `permit-card permit-card-${permit.scale}`;
+        card.dataset.permitId = permit.id;
+        card.innerHTML = `
+          <div class="permit-card-top">
+            <label class="permit-check">
+              <input type="checkbox" name="permitTypes" value="${permit.id}" />
+              <span class="permit-checkmark"><i class="fa fa-check"></i></span>
+              <span class="permit-card-title">${permit.title}</span>
+            </label>
+            <span class="permit-badge permit-badge-${permit.badge.toLowerCase()}">${permit.badge}</span>
+          </div>
+          <p>${permit.applies}</p>
+          <div class="permit-card-meta"><i class="fa fa-building-columns"></i>${permit.agency}</div>
+          <label class="permit-file-picker">
+            <i class="fa fa-cloud-arrow-up"></i>
+            <span>Choose file(s)</span>
+            <input class="permit-file" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple data-permit-id="${permit.id}" />
+          </label>
+          <span class="permit-file-name">No file selected</span>
+        `;
+
+        const checkbox = card.querySelector("input[type=checkbox]");
+        const fileInput = card.querySelector(".permit-file");
+        const fileName = card.querySelector(".permit-file-name");
+        const updateCard = () => {
+          const hasFiles = fileInput.files && fileInput.files.length > 0;
+          checkbox.checked = hasFiles || checkbox.checked;
+          card.classList.toggle("has-file", hasFiles);
+          fileName.textContent = hasFiles
+            ? Array.from(fileInput.files).map((file) => file.name).join(", ")
+            : "No file selected";
+          updateFileCount();
+          persistPermitState();
+        };
+        checkbox.addEventListener("change", () => {
+          card.classList.toggle("is-selected", checkbox.checked);
+          persistPermitState();
+        });
+        fileInput.addEventListener("change", updateCard);
+        return card;
+      }
+
+      function updateFileCount() {
+        const count = Array.from(document.querySelectorAll(".permit-file")).reduce(
+          (total, input) => total + (input.files ? input.files.length : 0),
+          verificationFiles.length,
+        );
+        fileCount.textContent = `${count} document${count === 1 ? "" : "s"}`;
+      }
+
+      function renderPermitChecklist() {
+        permitList.innerHTML = "";
+        const groups = new Map();
+        permitCatalog.forEach((permit) => {
+          if (!groups.has(permit.group)) {
+            const groupPermits = permitCatalog.filter(
+              (item) => item.group === permit.group,
+            );
+            const group = document.createElement("details");
+            const groupScale = groupPermits.every((item) => item.scale === "both")
+              ? "both"
+              : groupPermits[0].scale;
+            const groupCategory =
+              permit.group === "Core documents"
+                ? "core"
+                : permit.group === "Activity-based permits"
+                  ? "activity"
+                  : "scale";
+            group.className = "permit-group";
+            group.dataset.scale = groupScale;
+            group.dataset.category = groupCategory;
+            group.open = permit.group === "Core documents";
+            group.innerHTML = `
+              <summary>
+                <span class="permit-group-summary">
+                  <strong>${permit.group}</strong>
+                  <small>${groupPermits.length} document${groupPermits.length === 1 ? "" : "s"} to review</small>
+                </span>
+                <span class="permit-group-count"><i class="fa fa-chevron-down"></i></span>
+              </summary>
+              <div class="permit-group-grid"></div>
+            `;
+            permitList.appendChild(group);
+            groups.set(permit.group, group);
+          }
+          groups
+            .get(permit.group)
+            .querySelector(".permit-group-grid")
+            .appendChild(createPermitCard(permit));
+        });
+        updateFileCount();
+      }
+
+      function updateChecklistForScale(scale) {
+        permitList.dataset.scale = scale;
+        document.querySelectorAll(".permit-group").forEach((group) => {
+          const isWrongCategory = group.dataset.category !== activePermitCategory;
+          const isWrongScale =
+            group.dataset.scale !== "both" && group.dataset.scale !== scale;
+          const shouldHide = isWrongCategory || isWrongScale;
+          group.hidden = shouldHide;
+          if (shouldHide) group.open = false;
+        });
+        const selectedGroup = document.querySelector(
+          `.permit-group[data-category="${activePermitCategory}"]:not([hidden])`,
+        );
+        if (selectedGroup) selectedGroup.open = true;
+      }
+
+      document.querySelectorAll("[data-permit-category]").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          activePermitCategory = tab.dataset.permitCategory;
+          document.querySelectorAll("[data-permit-category]").forEach((item) => {
+            const isActive = item === tab;
+            item.classList.toggle("is-active", isActive);
+            item.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+          updateChecklistForScale(
+            document.querySelector("input[name=storeScale]:checked").value,
+          );
+          persistPermitState();
+        });
+      });
+
+      document.querySelectorAll("input[name=storeScale]").forEach((radio) => {
+        radio.addEventListener("change", () => {
+          document.querySelectorAll(".store-size-card").forEach((card) => {
+            card.classList.toggle("is-selected", card.querySelector("input").checked);
+          });
+          updateChecklistForScale(radio.value);
+          persistPermitState();
+          document.querySelectorAll(".permit-card").forEach((card) => {
+            card.classList.toggle(
+              "is-priority",
+              card.classList.contains(`permit-card-${radio.value}`),
+            );
+          });
+        });
+      });
+
+      function restorePermitState() {
+        const state = readPermitState();
+        if (!state) return;
+
+        const savedScale = state.storeScale === "large" ? "large" : "small";
+        const savedRadio = document.querySelector(
+          `input[name=storeScale][value="${savedScale}"]`,
+        );
+        if (savedRadio) savedRadio.checked = true;
+        document.querySelectorAll(".store-size-card").forEach((card) => {
+          card.classList.toggle("is-selected", card.querySelector("input").checked);
+        });
+
+        if (["core", "scale", "activity"].includes(state.activeCategory)) {
+          activePermitCategory = state.activeCategory;
+          document.querySelectorAll("[data-permit-category]").forEach((tab) => {
+            const isActive = tab.dataset.permitCategory === activePermitCategory;
+            tab.classList.toggle("is-active", isActive);
+            tab.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+
+        (state.selectedPermitIds || []).forEach((permitId) => {
+          const checkbox = Array.from(
+            document.querySelectorAll("input[name=permitTypes]"),
+          ).find((input) => input.value === permitId);
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.closest(".permit-card")?.classList.add("is-selected");
+          }
+        });
+
+        updateChecklistForScale(savedScale);
+        document.querySelectorAll(".permit-card").forEach((card) => {
+          card.classList.toggle(
+            "is-priority",
+            card.classList.contains(`permit-card-${savedScale}`),
+          );
+        });
+        updateFileCount();
+        if (state.verificationFiles?.length) {
+          verificationFileError.textContent =
+            "Previously selected files need to be selected again after a page refresh for browser privacy.";
+        }
+      }
+
+      function showPermitNotice(message, isError = false) {
+        permitNotice.textContent = message;
+        permitNotice.style.background = isError ? "#fff5f5" : "#f0fdf4";
+        permitNotice.style.color = isError ? "var(--danger)" : "var(--green)";
+        permitNotice.classList.add("show");
+      }
+
+      function getPermitErrorMessage(error) {
+        const messages = {
+          "storage/unauthorized": "Firebase Storage rejected this upload. Please contact an administrator.",
+          "storage/canceled": "The upload was canceled. Please try again.",
+          "storage/retry-limit-exceeded": "The upload took too long. Check your connection and try again.",
+          "permission-denied": "Your account is not allowed to submit permit documents yet.",
+          "auth/network-request-failed": "The connection failed. Check your internet and try again.",
+        };
+        return messages[error.code] || "Unable to save your permit submission. Please try again.";
+      }
+
+      const permitService = window.techKnowPermits.createPermitService(window.techKnowFirebase);
+      let permitSubmitting = false;
+      async function submitPermitToFirebase() {
+        if (permitSubmitting || permitSubmit.disabled) return;
+        if (!verificationFiles.length) {
+          showPermitNotice("Please select your Mayor's Permit or DTI/SEC Registration before submitting.", true);
+          verificationDropZone.focus();
+          return;
+        }
+        permitSubmitting = true;
+        permitSubmit.disabled = true;
+        permitSubmit.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Uploading documents...';
+        verificationFileError.textContent = "";
+        verificationDropZone.classList.remove("has-error");
+        try {
+          const submission = await permitService.submit({
+            files: verificationFiles,
+            onProgress: (current, total) => showPermitNotice(`Uploading document ${current} of ${total}...`),
+          });
+          // Browser persistence is optional and must not mark a committed upload as failed.
+          try {
+            sessionStorage.setItem("techknowPermitSubmission", JSON.stringify({
+              ...submission,
+              documents: submission.documents.map(({ storagePath, ...document }) => document),
+            }));
+            persistPermitState();
+          } catch (error) { console.warn("Local permit confirmation could not be saved", error); }
+          showPermitNotice("Your permit was submitted successfully and is now pending TechKnow admin verification.");
+          permitSubmit.innerHTML = 'Permit Submitted <i class="fa fa-check"></i>';
+        } catch (error) {
+          console.error("Permit submission failed", error);
+          showPermitNotice(error.code === "auth/no-current-user" ? error.message : getPermitErrorMessage(error), true);
+          permitSubmit.disabled = false;
+          permitSubmit.innerHTML = 'Submit Permit Package <i class="fa fa-arrow-right"></i>';
+        } finally {
+          permitSubmitting = false;
+        }
+      }
+      document.getElementById("permit-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        return submitPermitToFirebase();
+      });
+
+      renderStoreSummary();
+    </script>
+  </body>
+</html>

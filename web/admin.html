@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=5"/>
+<title>Store Dashboard | TechKnow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="admin-workspace.css?v=20261109-review-approval-state"/>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="admin-sidebar" aria-label="Store workspace">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon"><img src="teamlogo-clean.png" alt="TechKnow logo" /></div>
+    </div>
+  </div>
+  <div class="workspace-label"><i class="fa fa-store" aria-hidden="true"></i> Store workspace</div>
+  <nav class="sidebar-nav" aria-label="Main navigation">
+    <div class="nav-section-label">Workspace</div>
+    <button type="button" class="nav-item active" data-page="dashboard" aria-current="page">
+      <i class="fa fa-chart-pie"></i><span>Dashboard</span>
+    </button>
+    <button type="button" class="nav-item" data-page="products">
+      <i class="fa fa-boxes-stacked"></i><span>Products</span><span class="nav-badge nav-badge-muted" id="product-count">0</span>
+    </button>
+    <button type="button" class="nav-item" data-page="archived-products">
+      <i class="fa fa-box-archive"></i><span>Archived Products</span><span class="nav-badge nav-badge-muted" id="archived-product-count">0</span>
+    </button>
+    <button type="button" class="nav-item" data-page="reservations">
+      <i class="fa fa-calendar-check"></i><span>Reservations</span>
+    </button>
+    <div class="nav-section-label">Insights</div>
+    <button type="button" class="nav-item" data-page="reviews">
+      <i class="fa fa-star"></i><span>Reviews</span>
+    </button>
+    <button type="button" class="nav-item" data-page="nlp">
+      <i class="fa fa-brain"></i><span>NLP Summary</span>
+    </button>
+    <button type="button" class="nav-item" data-page="analytics">
+      <i class="fa fa-chart-bar"></i><span>Analytics</span>
+    </button>
+    <div class="nav-section-label">Management</div>
+    <button type="button" class="nav-item" data-page="permits">
+      <i class="fa fa-file-shield"></i><span>Permits</span>
+    </button>
+    <button type="button" class="nav-item" data-page="alerts">
+      <i class="fa fa-bell"></i><span>Alerts</span><span class="nav-badge nav-badge-muted" id="alert-count">0</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-card">
+      <div class="admin-avatar">SA</div>
+      <div>
+        <div class="admin-name">Store Admin</div>
+        <div class="admin-role">Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main-content" tabindex="-1">
+  <div class="topbar">
+    <button class="icon-btn mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="admin-sidebar">
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="topbar-breadcrumb"><span>Workspace</span><i class="fa fa-chevron-right" aria-hidden="true"></i><div class="topbar-title" id="topbar-title">Dashboard</div></div>
+    <div class="topbar-actions">
+      <time class="workspace-date" id="workspace-date"></time>
+      <button type="button" class="icon-btn" id="alert-trigger" title="Notifications" aria-label="Show notifications">
+        <i class="fa fa-bell" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• DASHBOARD â•â•â•â•â•â•â• -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">YOUR STORE AT A GLANCE</span>
+        <h2>Welcome back.</h2>
+        <p>A little clarity for your day. Here's how your store is doing.</p>
+      </div>
+      <div class="actions-row">
+        <button id="dashboard-refresh" class="btn btn-outline" type="button" onclick="refreshDashboard()"><i class="fa fa-rotate" aria-hidden="true"></i> Refresh</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <button type="button" class="stat-card tone-blue" data-go="products">
+        <span class="stat-icon"><i class="fa fa-boxes-stacked"></i></span>
+        <span class="stat-label">Total Products</span>
+        <span class="stat-value" id="admin-stat-products">0</span>
+        <span class="stat-hint">Manage your catalog <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-green" data-go="products">
+        <span class="stat-icon"><i class="fa fa-circle-check"></i></span>
+        <span class="stat-label">Available Products</span>
+        <span class="stat-value" id="admin-stat-available">0</span>
+        <span class="stat-hint">Ready for customers <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-blue" data-go="reservations" data-reservation-tab="accepted">
+        <span class="stat-icon"><i class="fa fa-bookmark"></i></span>
+        <span class="stat-label">Reserved Products</span>
+        <span class="stat-value" id="admin-stat-reserved">0</span>
+        <span class="stat-hint">View reserved items <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-amber" data-go="reservations" data-reservation-tab="pending">
+        <span class="stat-icon"><i class="fa fa-clock"></i></span>
+        <span class="stat-label">Pending Reservations</span>
+        <span class="stat-value" id="admin-stat-pending">0</span>
+        <span class="stat-hint">Review requests <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-green" data-go="reservations" data-reservation-tab="accepted">
+        <span class="stat-icon"><i class="fa fa-circle-check"></i></span>
+        <span class="stat-label">Accepted Reservations</span>
+        <span class="stat-value" id="admin-stat-accepted">0</span>
+        <span class="stat-hint">View accepted requests <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-violet" data-go="reservations" data-reservation-tab="waiting">
+        <span class="stat-icon"><i class="fa fa-hourglass-half"></i></span>
+        <span class="stat-label">Waiting List</span>
+        <span class="stat-value" id="admin-stat-waiting">0</span>
+        <span class="stat-hint">Manage waiting list <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-amber" data-go="reviews">
+        <span class="stat-icon"><i class="fa fa-star"></i></span>
+        <span class="stat-label">Shop Rating</span>
+        <span class="stat-value" id="admin-stat-rating">-</span>
+        <span class="stat-hint">See customer feedback <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+      <button type="button" class="stat-card tone-blue" data-go="reviews">
+        <span class="stat-icon"><i class="fa fa-comment"></i></span>
+        <span class="stat-label">Total Reviews</span>
+        <span class="stat-value" id="admin-stat-reviews">0</span>
+        <span class="stat-hint">Read your reviews <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+      </button>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card reservation-chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Most Reserved Products</div>
+            <div class="chart-sub">Top 10 products by reservation count</div>
+          </div>
+        </div>
+        <div class="chart-wrap reservation-chart-wrap"><canvas role="img" id="chartReserved" aria-label="Bar chart showing the most reserved products"></canvas></div>
+      </div>
+      <div class="chart-card reservation-chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Weekly Reservation Activity</div>
+            <div class="chart-sub">Reservations per week over the last 6 weeks</div>
+          </div>
+        </div>
+        <div class="chart-wrap reservation-chart-wrap"><canvas role="img" id="chartWeekly" aria-label="Line chart showing weekly reservation activity"></canvas></div>
+      </div>
+      <div class="chart-card sentiment-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Review Sentiment Analysis</div>
+        <div class="chart-sub">The sentiment behind your customer feedback</div>
+          </div>
+        </div>
+        <button type="button" class="text-link" data-go="nlp">View insights <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        <div class="chart-wrap chart-wrap-sentiment"><canvas role="img" id="chartSentiment" aria-label="Doughnut chart showing positive, neutral, and negative review sentiment"></canvas></div>
+      </div>
+      <section class="card quick-actions" aria-labelledby="quick-actions-title">
+        <span class="page-eyebrow">MAKE YOUR NEXT MOVE</span>
+        <h3 id="quick-actions-title">Keep your store moving.</h3>
+        <p>Everyday essentials, one click away.</p>
+        <button type="button" class="quick-action" data-go="reservations" data-reservation-tab="pending">
+          <span class="quick-action-icon tone-amber"><i class="fa fa-calendar-check" aria-hidden="true"></i></span>
+          <span><strong>Review reservations</strong><small>Give your customers their next update</small></span>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="quick-action" data-go="analytics">
+          <span class="quick-action-icon tone-green"><i class="fa fa-chart-line" aria-hidden="true"></i></span>
+          <span><strong>Explore store insights</strong><small>See what your customers are interested in</small></span>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </section>
+    </div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• PRODUCTS â•â•â•â•â•â•â• -->
+  <div class="page" id="page-products">
+    <div class="page-header">
+      <div>
+        <h2>Products</h2>
+        <p>Manage your own store's product listings.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn btn-primary btn-sm" onclick="openAddProduct()"><i class="fa fa-plus"></i> Add Product</button>
+      </div>
+    </div>
+
+    <div class="product-toolbar">
+      <div class="product-toolbar-copy">
+        <span class="section-eyebrow">Catalog</span>
+        <strong>Active listings</strong>
+        <span>Search and filter the products currently visible in your store.</span>
+      </div>
+      <div class="product-controls">
+        <label class="product-search-field">
+          <span class="sr-only">Search products</span>
+          <i class="fa fa-search" aria-hidden="true"></i>
+          <input type="search" placeholder="Search by product name" id="product-search" oninput="filterProducts()"/>
+          <button type="button" class="search-clear" onclick="clearProductFilters()" aria-label="Clear product search"><i class="fa fa-xmark"></i></button>
+        </label>
+        <label class="product-status-field">
+          <span>Status</span>
+          <select id="product-status-filter" onchange="filterProducts()">
+            <option value="">All statuses</option>
+            <option value="Available">Available</option>
+            <option value="Low Stock">Low Stock</option>
+            <option value="Out of Stock">Out of Stock</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="product-policy-card">
+      <div class="product-policy-icon"><i class="fa fa-boxes-stacked"></i></div>
+      <div>
+        <strong>Inventory policy</strong>
+        <span>Each listing supports up to 10 units. 5–10 units is Available, 1–4 units is Low Stock, and 0 units is Out of Stock.</span>
+      </div>
+    </div>
+
+    <div class="product-table-card">
+      <div class="product-table-heading">
+        <div>
+          <strong>Product inventory</strong>
+          <span>Manage pricing, availability, and listings from one place.</span>
+        </div>
+        <span class="table-context" id="inventory-results" role="status">0 products</span>
+      </div>
+      <div class="table-wrap">
+        <table id="products-table" class="inventory-table" aria-label="Active product inventory">
+        <thead>
+          <tr>
+            <th scope="col">Product / Category</th>
+            <th scope="col" class="price-cell">Unit price</th>
+            <th scope="col" class="quantity-cell">Stock</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESERVATIONS  -->
+  <!-- ARCHIVED PRODUCTS -->
+  <div class="page" id="page-archived-products">
+    <div class="page-header">
+      <div>
+        <h2>Archived Products</h2>
+        <p>Keep discontinued or temporarily hidden listings safely out of the active catalog.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn btn-outline btn-sm" onclick="document.querySelector('[data-page=products]').click()"><i class="fa fa-arrow-left"></i> Back to Products</button>
+      </div>
+    </div>
+    <div class="product-policy-card">
+      <div class="product-policy-icon"><i class="fa fa-box-archive"></i></div>
+      <div>
+        <strong>Archive</strong>
+        <span>Hidden from customers and active inventory. Restore within 30 days to return the listing to your catalog.</span>
+      </div>
+    </div>
+    <div class="product-table-card archive-table-card">
+      <div class="product-table-heading">
+        <div>
+          <strong>Archived listings</strong>
+          <span>Restore a product when it is ready to return to your catalog.</span>
+        </div>
+        <span class="table-context"><i class="fa fa-box-archive"></i> Store catalog</span>
+      </div>
+      <div class="table-wrap">
+        <table id="archived-products-table" class="inventory-table" aria-label="Archived product inventory">
+        <thead>
+          <tr><th scope="col">Product / Category</th><th scope="col" class="price-cell">Unit price</th><th scope="col" class="quantity-cell">Stock</th><th scope="col">Archived on</th><th scope="col">Actions</th></tr>
+        </thead>
+        <tbody id="archived-products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-reservations">
+    <div class="page-header">
+      <div>
+        <h2>Reservations</h2>
+        <p>Process reservations and manage stock-out waiting lists.</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="pending" onclick="switchTab('reservations', this)">Pending <span class="nav-badge" id="pending-reservation-count" style="background:var(--warning);color:#fff">0</span></button>
+      <button type="button" class="tab" data-tab="accepted" onclick="switchTab('reservations', this)">Accepted</button>
+      <button type="button" class="tab" data-tab="rejected" onclick="switchTab('reservations', this)">Rejected</button>
+      <button type="button" class="tab" data-tab="waiting" onclick="switchTab('reservations', this)">Waiting List <span class="nav-badge" id="waiting-reservation-count" style="background:#5d43a5;color:#fff">0</span></button>
+    </div>
+    <div class="table-wrap" id="reservations-table-wrap"></div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• REVIEWS â•â•â•â•â•â•â• -->
+  <div class="page" id="page-reviews">
+    <div class="page-header">
+      <div>
+        <h2>Reviews</h2>
+        <p>Review customer feedback and send inappropriate or irrelevant content to the superadmin.</p>
+      </div>
+    </div>
+    <section class="product-table-card reviews-card" aria-label="Customer reviews">
+      <div class="product-table-heading">
+        <div><strong>Customer feedback</strong><span id="reviews-summary" role="status">No reviews yet</span></div>
+        <span class="table-context">Store reviews</span>
+      </div>
+      <div class="table-wrap">
+      <table id="reviews-table" aria-label="Customer feedback and purchase proof">
+        <thead>
+          <tr><th scope="col">Customer</th><th scope="col">Rating</th><th scope="col">Feedback</th><th scope="col">Actions</th></tr>
+        </thead>
+        <tbody id="reviews-tbody"></tbody>
+      </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• NLP SUMMARY â•â•â•â•â•â•â• -->
+  <div class="page" id="page-nlp">
+    <div class="page-header">
+      <div>
+        <h2>NLP Summary</h2>
+        <p>Live review analysis using multilingual BERT and the Taglish-Hiligaynon sentiment lexicon.</p>
+      </div>
+    </div>
+    <div id="nlp-model-status" class="nlp-model-status" role="status" aria-live="polite">Open NLP Summary to analyze your store's reviews.</div>
+    <div class="nlp-model-note"><i class="fa fa-circle-info"></i><span>The lexicon supplements BERT with known Taglish/Hiligaynon cues, but local-language accuracy can vary. Sarcasm flags are risk signals, not definitive judgments; implicit sarcasm can be missed, so flagged reviews still need a person to verify them.</span></div>
+    <div class="three-col nlp-stats" id="nlp-stats"></div>
+    <div class="two-col nlp-panels">
+      <div class="card">
+        <div class="card-title"><i class="fa fa-chart-line"></i> Sentiment breakdown</div>
+        <div id="nlp-sentiment-breakdown" class="nlp-breakdown"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-triangle-exclamation" style="color:var(--warning)"></i> Needs human attention</div>
+        <div id="nlp-attention-summary" class="nlp-attention-summary"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-face-smile" style="color:var(--success)"></i> Positive lexicon signals</div>
+        <div class="keyword-cloud" id="nlp-positive-keywords"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-face-frown" style="color:var(--danger)"></i> Negative lexicon signals</div>
+        <div class="keyword-cloud" id="nlp-negative-keywords"></div>
+      </div>
+    </div>
+    <div class="card nlp-review-card">
+      <div class="nlp-review-heading">
+        <div><div class="card-title"><i class="fa fa-list-check"></i> Review-by-review analysis</div>
+          <p>Every review is included. Suspected sarcasm, mixed sentiment, and rating/text conflicts are marked for human follow-up.</p></div>
+        <span id="nlp-coverage-badge" class="nlp-coverage-badge">Waiting</span>
+      </div>
+      <div class="table-wrap nlp-review-table-wrap">
+        <table class="nlp-review-table">
+          <thead><tr><th>Customer / product</th><th>Feedback</th><th>Rating</th><th>Sentiment</th><th>Attention</th><th>Analysis</th></tr></thead>
+          <tbody id="nlp-review-rows"><tr><td colspan="6" class="empty-table">Open NLP Summary to begin analysis.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• ANALYTICS â•â•â•â•â•â•â• -->
+  <div class="page" id="page-analytics">
+    <div class="page-header analytics-page-header">
+      <div>
+        <h2>Analytics</h2>
+        <p>See what customers notice, save, and reserve so you can improve your store with confidence.</p>
+      </div>
+    </div>
+    <div class="analytics-guide">
+      <div class="analytics-guide-icon"><i class="fa fa-lightbulb"></i></div>
+      <div class="analytics-guide-copy"><strong>Read your store performance from left to right</strong><span>Start with attention, move to interest, then check reservations. Each step helps you decide what to improve next.</span></div>
+      <div class="analytics-guide-steps" aria-label="Analytics reading order">
+        <span><b>1</b> Attention</span><i class="fa fa-arrow-right"></i><span><b>2</b> Interest</span><i class="fa fa-arrow-right"></i><span><b>3</b> Action</span>
+      </div>
+    </div>
+    <div class="analytics-summary" id="analytics-summary"></div>
+    <div class="analytics-flow-card">
+      <div class="analytics-panel-heading">
+        <div><span class="analytics-eyebrow">Quick guide</span><strong>How customers move through your store</strong></div>
+        <span class="analytics-panel-note">Read left to right</span>
+      </div>
+      <div class="analytics-flow-grid">
+        <div class="analytics-flow-step"><div class="analytics-flow-icon"><i class="fa fa-eye"></i></div><div><strong>Views</strong><span>They notice a product</span></div></div>
+        <i class="analytics-flow-arrow fa fa-arrow-right"></i>
+        <div class="analytics-flow-step"><div class="analytics-flow-icon analytics-flow-icon-warm"><i class="fa fa-heart"></i></div><div><strong>Favorites</strong><span>They want to remember it</span></div></div>
+        <i class="analytics-flow-arrow fa fa-arrow-right"></i>
+        <div class="analytics-flow-step"><div class="analytics-flow-icon analytics-flow-icon-green"><i class="fa fa-bookmark"></i></div><div><strong>Reservations</strong><span>They show buying intent</span></div></div>
+      </div>
+      <div class="analytics-tip"><i class="fa fa-circle-info"></i><span><strong>Simple rule:</strong> high views but low reservations usually means the product page needs clearer photos, pricing, stock, or description.</span></div>
+    </div>
+    <div class="analytics-section-heading"><span>01</span><div><strong>Store performance</strong><small>Use these signals to decide which products deserve attention first.</small></div></div>
+    <div class="two-col analytics-primary">
+      <div class="card analytics-card analytics-card-featured">
+        <div class="analytics-card-heading"><div class="analytics-card-icon"><i class="fa fa-bookmark"></i></div><div><div class="card-title">Most Reserved Products</div><span class="analytics-card-kicker">Action</span></div></div>
+        <p class="analytics-help">Products showing the strongest customer intent.</p>
+        <div id="most-reserved"></div>
+        <div class="analytics-insight analytics-insight-primary"><i class="fa fa-check"></i><div><strong>Next step</strong><span>Keep these products in stock and feature them when you want to drive action.</span></div></div>
+      </div>
+      <div class="card analytics-card">
+        <div class="analytics-card-heading"><div class="analytics-card-icon"><i class="fa fa-heart"></i></div><div><div class="card-title">Favorite Count Per Item</div><span class="analytics-card-kicker">Interest</span></div></div>
+        <p class="analytics-help">Customers who currently have each product saved.</p>
+        <button type="button" class="btn btn-outline btn-sm" onclick="window.refreshStoreFavoriteCounts?.()">Refresh favorites</button>
+        <div id="fav-count" aria-live="polite"></div>
+        <div class="analytics-insight"><i class="fa fa-heart"></i><div><strong>Next step</strong><span>Use favorites to spot products worth promoting again or keeping available.</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• PERMITS â•â•â•â•â•â•â• -->
+  <div class="page" id="page-permits">
+    <div class="page-header">
+      <div>
+        <h2>Permit Verification</h2>
+        <p>Submit your business permits to the superadmin and track their review status.</p>
+      </div>
+      <button class="btn btn-primary btn-sm" id="new-permit-button" onclick="openPermitForm()" disabled>
+        <i class="fa fa-plus"></i> Submit New Permit
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="permit-status-bar">
+      <div class="permit-stat">
+        <div class="permit-stat-icon" style="background:var(--brand-soft);color:var(--brand)"><i class="fa fa-file-lines"></i></div>
+        <div>
+          <div class="permit-stat-label">Total Submitted</div>
+            <div class="permit-stat-value" id="pstat-total">0</div>
+        </div>
+      </div>
+      <div class="permit-stat">
+        <div class="permit-stat-icon" style="background:#f0fdf4;color:var(--success)"><i class="fa fa-circle-check"></i></div>
+        <div>
+          <div class="permit-stat-label">Approved</div>
+            <div class="permit-stat-value" id="pstat-real" style="color:var(--success)">0</div>
+        </div>
+      </div>
+      <div class="permit-stat">
+        <div class="permit-stat-icon" style="background:#fef2f2;color:var(--danger)"><i class="fa fa-circle-xmark"></i></div>
+        <div>
+          <div class="permit-stat-label">Rejected</div>
+            <div class="permit-stat-value" id="pstat-fake" style="color:var(--danger)">0</div>
+        </div>
+      </div>
+      <div class="permit-stat">
+        <div class="permit-stat-icon" style="background:#fffbeb;color:var(--warning)"><i class="fa fa-clock"></i></div>
+        <div>
+          <div class="permit-stat-label">Under Review</div>
+            <div class="permit-stat-value" id="pstat-pending" style="color:var(--warning)">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="permit-tabs">
+      <button type="button" class="permit-tab active" data-ptab="all" onclick="switchPermitTab(this)" disabled>All Permits</button>
+      <button type="button" class="permit-tab" data-ptab="approved" onclick="switchPermitTab(this)" disabled>Approved</button>
+      <button type="button" class="permit-tab" data-ptab="rejected" onclick="switchPermitTab(this)" disabled>Rejected</button>
+      <button type="button" class="permit-tab" data-ptab="pending" onclick="switchPermitTab(this)" disabled>Pending</button>
+    </div>
+
+    <!-- Permit Cards Grid -->
+    <div class="permit-grid" id="permit-grid"><p>Loading permit submissions...</p></div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â• ALERTS â•â•â•â•â•â•â• -->
+  <div class="page" id="page-alerts">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">STORE ACTIVITY</span>
+        <h2>Alerts</h2>
+        <p>Your store updates, important notices, and recent actions in one place.</p>
+      </div>
+      <button id="clear-alert-history" class="btn btn-outline btn-sm" type="button" onclick="clearAlerts()"><i class="fa fa-trash-can" aria-hidden="true"></i> Clear history</button>
+    </div>
+    <section class="alerts-inbox" aria-labelledby="alerts-feed-title">
+    <div class="alert-history-toolbar">
+      <div class="alert-history-toolbar-main">
+        <div class="alert-history-toolbar-icon"><i class="fa fa-bell" aria-hidden="true"></i></div>
+        <div>
+          <h3 id="alerts-feed-title">Activity feed</h3>
+          <span id="alert-history-summary">No saved alerts yet.</span>
+        </div>
+      </div>
+      <button type="button" class="alert-history-order" id="alert-history-sort" aria-label="Sort alerts, newest first" aria-pressed="true" onclick="toggleAlertHistorySort()"><i class="fa fa-arrow-down-wide-short" aria-hidden="true"></i> <span>Newest first</span></button>
+    </div>
+    <div class="alert-history-filters" role="group" aria-label="Filter alert history">
+      <button type="button" class="alert-filter" data-alert-filter="all" aria-pressed="true" onclick="filterAlertHistory('all')">All activity <span data-alert-filter-count="all">0</span></button>
+      <button type="button" class="alert-filter" data-alert-filter="attention" aria-pressed="false" onclick="filterAlertHistory('attention')"><i class="alert-filter-dot" aria-hidden="true"></i> Needs attention <span data-alert-filter-count="attention">0</span></button>
+      <button type="button" class="alert-filter" data-alert-filter="success" aria-pressed="false" onclick="filterAlertHistory('success')">Success <span data-alert-filter-count="success">0</span></button>
+      <button type="button" class="alert-filter" data-alert-filter="info" aria-pressed="false" onclick="filterAlertHistory('info')">Updates <span data-alert-filter-count="info">0</span></button>
+    </div>
+    <div id="alerts-list" class="alerts-history-list"></div>
+    <div class="alert-history-footer"><span id="alerts-result-count" role="status"></span><span><i class="fa fa-clock" aria-hidden="true"></i> Philippine time</span></div>
+    </section>
+  </div>
+</main>
+
+<!-- â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â• -->
+
+<!-- Clear Alert History Confirmation -->
+<div class="modal-overlay" id="modal-clear-alert-history" role="dialog" aria-modal="true" aria-labelledby="clear-alert-history-title">
+  <div class="modal alert-confirm-modal">
+    <div class="alert-confirm-icon"><i class="fa fa-trash-can"></i></div>
+    <div class="modal-header alert-confirm-header">
+      <div>
+        <div class="modal-title" id="clear-alert-history-title">Clear alert history?</div>
+        <p class="alert-confirm-copy">This will permanently remove the saved alert history for this store from this browser.</p>
+      </div>
+      <button class="modal-close" type="button" aria-label="Close confirmation" onclick="closeModal('modal-clear-alert-history')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-footer alert-confirm-footer">
+      <button class="btn btn-outline" type="button" onclick="closeModal('modal-clear-alert-history')">Cancel</button>
+      <button class="btn btn-danger" type="button" onclick="confirmClearAlerts()"><i class="fa fa-trash-can"></i> Clear history</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal-overlay" id="modal-add-product">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Product</div>
+      <button class="modal-close" onclick="closeModal('modal-add-product')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group"><label class="input-label">Product Name <span style="color:var(--danger)">*</span></label><input type="text" id="add-product-name" placeholder="e.g. Wireless Mouse"/></div>
+      <div class="input-group"><label class="input-label">Category <span style="color:var(--danger)">*</span></label>
+        <select id="add-product-category">
+          <option value="">Select a category</option>
+          <option value="Components">Components</option>
+          <option value="Peripherals">Peripherals</option>
+          <option value="Laptops">Laptops</option>
+          <option value="Storage">Storage</option>
+          <option value="Monitors">Monitors</option>
+          <option value="Keyboards">Keyboards</option>
+          <option value="Networking">Networking</option>
+        </select>
+        <small id="add-product-category-hint" class="field-help" role="status" aria-live="polite">Enter a product name or description for a category suggestion.</small>
+      </div>
+      <div class="two-col">
+        <div class="input-group"><label class="input-label">Price <span style="color:var(--danger)">*</span></label><input type="text" id="add-product-price" inputmode="decimal" placeholder="0.00" autocomplete="off" oninput="formatAddProductPrice(this)"/></div>
+        <div class="input-group"><label class="input-label">Stock Quantity <span style="color:var(--danger)">*</span></label><input type="number" id="add-product-stock" min="0" max="10" step="1" placeholder="0"/><small class="field-help">Maximum of 10 units</small></div>
+      </div>
+      <div class="input-group"><label class="input-label">Stock Status <span style="color:var(--text-muted)">(automatic)</span></label>
+        <select id="add-product-status" disabled><option>Available</option><option>Low Stock</option><option>Out of Stock</option></select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Product Image <span style="color:var(--text-muted)">(optional)</span></label>
+        <div class="upload-area" onclick="document.getElementById('add-product-image').click()">
+          <i class="fa fa-cloud-arrow-up"></i>
+          <p><span>Click to upload</span> or drag and drop</p>
+          <p style="font-size:11px;margin-top:4px;color:var(--text-muted)">PNG or JPG up to 10MB</p>
+          <input type="file" id="add-product-image" accept="image/png,image/jpeg,.png,.jpg,.jpeg" style="display:none" onchange="previewProductImage(event)"/>
+        </div>
+        <div id="add-product-image-preview" style="display:none;text-align:center;margin-top:8px">
+          <img id="add-product-preview-src" style="max-height:120px;max-width:100%;border-radius:8px;border:1px solid var(--border)"/>
+          <div id="add-product-image-name" style="font-size:11px;color:var(--text-secondary);margin-top:5px"></div>
+        </div>
+        <div id="add-product-upload-status" class="product-upload-status" role="status" aria-live="polite" style="display:none">
+          <div class="product-upload-status-heading"><span><i id="add-product-upload-status-icon" class="fa fa-circle-check"></i><span id="add-product-upload-status-label">Image ready</span></span><strong id="add-product-upload-percent">100%</strong></div>
+          <div class="progress-bar"><div id="add-product-upload-progress" class="progress-fill"></div></div>
+          <small id="add-product-upload-message">Your image is ready to be saved with this product.</small>
+        </div>
+      </div>
+      <div class="input-group"><label class="input-label">Description</label><textarea rows="3" placeholder="Product description..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-product')">Cancel</button>
+      <button type="button" id="add-product-submit" class="btn btn-primary" onclick="submitAddProduct()"><i class="fa fa-plus"></i> Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-overlay" id="modal-edit-product">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Product</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-product')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group"><label class="input-label">Product Name <span style="color:var(--danger)">*</span></label><input type="text" id="edit-name" placeholder="e.g. Wireless Mouse"/></div>
+      <div class="input-group"><label class="input-label">Category <span style="color:var(--danger)">*</span></label>
+        <select id="edit-category">
+          <option value="">Select a category</option>
+          <option value="Components">Components</option>
+          <option value="Peripherals">Peripherals</option>
+          <option value="Laptops">Laptops</option>
+          <option value="Storage">Storage</option>
+          <option value="Monitors">Monitors</option>
+          <option value="Keyboards">Keyboards</option>
+          <option value="Networking">Networking</option>
+        </select>
+      </div>
+      <div class="two-col">
+        <div class="input-group"><label class="input-label">Price</label><input type="number" id="edit-price"/></div>
+        <div class="input-group"><label class="input-label">Stock Quantity <span style="color:var(--danger)">*</span></label><input type="number" id="edit-stock" min="0" max="10" step="1" placeholder="0"/><small class="field-help">Maximum of 10 units</small></div>
+      </div>
+      <div class="input-group"><label class="input-label">Stock Status <span style="color:var(--text-muted)">(automatic)</span></label>
+        <select id="edit-status" disabled><option>Available</option><option>Low Stock</option><option>Out of Stock</option></select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Product Image <span style="color:var(--text-muted)">(optional)</span></label>
+        <div class="upload-area" onclick="document.getElementById('edit-product-image').click()">
+          <i class="fa fa-cloud-arrow-up"></i>
+          <p><span>Click to upload</span> or drag and drop</p>
+          <p style="font-size:11px;margin-top:4px;color:var(--text-muted)">PNG or JPG up to 10MB</p>
+          <input type="file" id="edit-product-image" accept="image/png,image/jpeg,.png,.jpg,.jpeg" style="display:none" onchange="previewEditProductImage(event)"/>
+        </div>
+        <div id="edit-product-image-preview" style="display:none;text-align:center;margin-top:8px">
+          <img id="edit-product-preview-src" style="max-height:120px;max-width:100%;border-radius:8px;border:1px solid var(--border)"/>
+          <div id="edit-product-image-name" style="font-size:11px;color:var(--text-secondary);margin-top:5px"></div>
+        </div>
+      </div>
+      <div class="input-group"><label class="input-label">Description</label><textarea id="edit-description" rows="3" placeholder="Product description..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-product')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()"><i class="fa fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Archive Confirm Modal -->
+<div class="modal-overlay" id="modal-archive">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <div class="modal-title">Archive Product</div>
+      <button class="modal-close" onclick="closeModal('modal-archive')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary);font-size:13px">Move <strong id="archive-product-name"></strong> to Archived Products? It will be hidden from the active catalog and can be restored later.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-archive')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmArchive()"><i class="fa fa-box-archive"></i> Archive</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permanent Archived Product Delete Modal -->
+<div class="modal-overlay" id="modal-delete-archived-product" role="dialog" aria-modal="true" aria-labelledby="delete-archived-product-title">
+  <div class="modal" style="max-width:390px">
+    <div class="modal-header">
+      <div class="modal-title" id="delete-archived-product-title">Delete Archived Product</div>
+      <button class="modal-close" type="button" aria-label="Close delete confirmation" onclick="closeModal('modal-delete-archived-product')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary);font-size:13px;line-height:20px">Are you sure you want to permanently delete <strong id="delete-archived-product-name"></strong>? This product record cannot be restored.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" type="button" onclick="closeModal('modal-delete-archived-product')">Cancel</button>
+      <button class="btn btn-danger" type="button" id="confirm-delete-archived-product" onclick="confirmDeleteArchivedProduct()"><i class="fa fa-trash-can"></i> Delete permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Proof Modal -->
+<div class="modal-overlay" id="modal-proof">
+  <div class="modal review-proof-modal">
+    <div class="modal-header">
+      <div class="modal-title">Proof of Purchase</div>
+      <button class="modal-close" onclick="closeModal('modal-proof')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="review-proof-preview">
+        <img id="review-proof-image" alt="Customer proof of purchase" style="display:none" />
+        <p id="review-proof-message" role="status" style="display:none">The proof image could not be loaded.</p>
+      </div>
+      <form id="review-report-form" class="review-report-form">
+        <h3>Report proof image</h3>
+        <p>The superadmin will review this proof image and the reason you provide.</p>
+        <fieldset class="review-report-reasons">
+          <legend>Choose a reason</legend>
+          <label><input type="radio" name="review-report-reason" value="Duplicate / Redundant Proof" required><span>Duplicate / Redundant Proof</span></label>
+          <label><input type="radio" name="review-report-reason" value="Blurry or Unreadable Receipt"><span>Blurry or Unreadable Receipt</span></label>
+          <label><input type="radio" name="review-report-reason" value="Irrelevant / Misleading Photo"><span>Irrelevant / Misleading Photo</span></label>
+          <label><input type="radio" name="review-report-reason" value="Inappropriate or Offensive Content"><span>Inappropriate or Offensive Content</span></label>
+          <label><input type="radio" name="review-report-reason" value="Other"><span>Other</span></label>
+        </fieldset>
+        <button type="button" id="review-report-clear" class="review-report-clear" hidden>Clear selection</button>
+        <div id="review-report-other-wrap" hidden>
+          <label class="input-label" for="review-report-other">Optional comment</label>
+          <textarea id="review-report-other" rows="3" maxlength="900" placeholder="Add a little more detail if needed."></textarea>
+        </div>
+        <p id="review-report-status" class="review-report-status" role="status" aria-live="polite"></p>
+        <div class="review-report-actions">
+          <button type="button" class="review-approve-button" id="review-approve-button"><i class="fa fa-check" aria-hidden="true"></i><span id="review-approve-label">Approve</span></button>
+          <button type="submit" class="btn btn-outline review-report-submit" id="review-report-submit"><i class="fa fa-flag" aria-hidden="true"></i><span id="review-report-submit-label">Report</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Permit Modal -->
+<div class="modal-overlay" id="modal-submit-permit">
+  <div class="modal permit-submit-modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Submit Business Permit</h2>
+        <p class="permit-form-intro">Add your permit details and a clear document for review.</p>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-submit-permit')">Close</button>
+    </div>
+    <div class="modal-body">
+      <p class="permit-form-hint">Permit type, number, issuing authority, and document are required.</p>
+      <div class="permit-form-grid">
+        <div class="input-group">
+          <label class="input-label" for="permit-type">Permit Type</label>
+          <select id="permit-type" aria-required="true">
+            <option value="">Select permit type</option>
+            <option>Mayor's Permit</option>
+            <option>Barangay Clearance</option>
+            <option>BIR Certificate of Registration</option>
+            <option>DTI Business Name Registration</option>
+            <option>SEC Registration</option>
+            <option>Sanitary Permit</option>
+            <option>Fire Safety Inspection Certificate</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="permit-number">Permit Number</label>
+          <input type="text" id="permit-number" placeholder="e.g. MP-2026-00123" aria-required="true"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="permit-authority">Issuing Authority</label>
+          <input type="text" id="permit-authority" placeholder="e.g. City Hall of Canlaon" aria-required="true"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="permit-business">Business Name on Permit <span class="permit-optional">Optional</span></label>
+          <input type="text" id="permit-business" placeholder="e.g. My Store"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="permit-date-issued">Date Issued <span class="permit-optional">Optional</span></label>
+          <input type="text" id="permit-date-issued" placeholder="e.g. Jan 10, 2026"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="permit-expiry">Valid Until <span class="permit-optional">Optional</span></label>
+          <input type="text" id="permit-expiry" placeholder="e.g. Dec 31, 2026"/>
+        </div>
+      </div>
+      <div class="input-group permit-document-group">
+        <label class="input-label" for="permit-file">Permit Document</label>
+        <button type="button" class="upload-area" onclick="document.getElementById('permit-file').click()" id="permit-upload-area" aria-describedby="permit-upload-hint">
+          <strong>Choose a document</strong>
+          <span id="permit-upload-hint">PNG, JPG, or PDF up to 10 MB</span>
+        </button>
+        <input type="file" id="permit-file" accept="image/*,.pdf" style="display:none" onchange="permitFileSelected(event)"/>
+        <div id="permit-file-preview" class="permit-file-preview" style="display:none" aria-live="polite">
+          <span id="permit-file-name"></span>
+          <button type="button" class="permit-remove-file" onclick="clearPermitFile()">Remove</button>
+        </div>
+      </div>
+      <div class="permit-review-note">
+        Your permit will be sent to the superadmin for review. Track its status in your permit history.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-submit-permit')">Cancel</button>
+      <button class="btn btn-primary" id="permit-submit-button" onclick="submitPermit()">Submit for Verification</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permit Detail / Verification Result Modal -->
+<div class="modal-overlay" id="modal-permit-detail">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="pdetail-title">Permit Details</div>
+      <button class="modal-close" onclick="closeModal('modal-permit-detail')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Verification Result Banner -->
+      <div id="pdetail-result-banner"></div>
+      <div id="pd-documents" style="margin-top:14px;overflow-wrap:anywhere"></div>
+      <!-- Details -->
+      <div style="margin-top:14px">
+        <div class="verify-detail-row"><span class="verify-detail-label">Permit Type</span><span class="verify-detail-value" id="pd-type"></span></div>
+        <div class="verify-detail-row"><span class="verify-detail-label">Permit Number</span><span class="verify-detail-value" id="pd-number" style="font-family:'DM Mono',monospace"></span></div>
+        <div class="verify-detail-row"><span class="verify-detail-label">Issuing Authority</span><span class="verify-detail-value" id="pd-authority"></span></div>
+        <div class="verify-detail-row"><span class="verify-detail-label">Date Issued</span><span class="verify-detail-value" id="pd-issued"></span></div>
+        <div class="verify-detail-row"><span class="verify-detail-label">Valid Until</span><span class="verify-detail-value" id="pd-expiry"></span></div>
+        <div class="verify-detail-row"><span class="verify-detail-label">Submitted On</span><span class="verify-detail-value" id="pd-submitted"></span></div>
+      </div>
+      <!-- Verification Score (only when verified) -->
+      <div id="pdetail-score-section" style="display:none;margin-top:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:10px">Verification Report</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">Authenticity Score</div>
+        <div class="verify-score-bar"><div class="verify-score-fill" id="pd-score-bar"></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px" id="pd-score-label"></div>
+        <div id="pd-checks"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-permit-detail')">Close</button>
+      <button class="btn btn-danger btn-sm" id="pd-flag-btn" style="display:none"><i class="fa fa-flag"></i> Flag as Fake</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Alerts Panel -->
+<div class="alerts-panel" id="alerts-panel"></div>
+
+<script>
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// DATA
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+let products = [];
+let archivedProducts = [];
+
+const reservations = { pending: [], accepted: [], rejected: [], waiting: [] };
+
+const reviews = [];
+
+const alertsData = [];
+const alertHistory = [];
+let alertHistoryFilter = 'all';
+let alertHistorySort = 'newest';
+let alertHistoryStorageKey = 'techknowAdminAlertHistory:default';
+const MAX_ALERT_HISTORY = 200;
+
+let currentEditId = null;
+let currentArchiveId = null;
+window.pendingProductImage = null;
+
+function alertHistoryKey(alert) {
+  return [alert?.type, alert?.icon, alert?.title, alert?.desc].map(value => String(value ?? '')).join('|');
+}
+
+function loadAlertHistory() {
+  alertHistory.splice(0, alertHistory.length);
+  try {
+    const saved = JSON.parse(localStorage.getItem(alertHistoryStorageKey) || '[]');
+    if (Array.isArray(saved)) alertHistory.push(...saved.slice(0, MAX_ALERT_HISTORY));
+  } catch (error) {
+    console.warn('Alert history could not be loaded', error);
+  }
+}
+
+function saveAlertHistory() {
+  try {
+    localStorage.setItem(alertHistoryStorageKey, JSON.stringify(alertHistory.slice(0, MAX_ALERT_HISTORY)));
+  } catch (error) {
+    console.warn('Alert history could not be saved', error);
+  }
+}
+
+function recordAlertHistory(alert, dedupe = false) {
+  const now = Date.now();
+  const entry = {
+    id: `alert-${now}-${Math.random().toString(36).slice(2, 8)}`,
+    type: alert?.type || 'info',
+    icon: alert?.icon || 'fa-bell',
+    title: alert?.title || 'System alert',
+    desc: alert?.desc || '',
+    time: alert?.time || 'Admin dashboard',
+    recordedAt: now,
+  };
+  if (dedupe && alertHistory.some(item => item.historyKey === alertHistoryKey(entry))) return;
+  entry.historyKey = alertHistoryKey(entry);
+  alertHistory.unshift(entry);
+  if (alertHistory.length > MAX_ALERT_HISTORY) alertHistory.length = MAX_ALERT_HISTORY;
+  saveAlertHistory();
+}
+
+window.setAdminAlertHistoryScope = function setAdminAlertHistoryScope(storeId) {
+  const nextKey = `techknowAdminAlertHistory:${String(storeId || 'default').replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  if (nextKey === alertHistoryStorageKey) return;
+  alertHistoryStorageKey = nextKey;
+  loadAlertHistory();
+  renderAlertsPage();
+};
+
+loadAlertHistory();
+
+//nav
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (!item.dataset.page) return;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('topbar-title').textContent = item.querySelector('span').textContent;
+    closeSidebar();
+  });
+});
+
+function closeSidebar() {
+  document.body.classList.remove('sidebar-open');
+  document.querySelector('.sidebar').classList.remove('open');
+  const menuButton = document.getElementById('mobile-menu-btn');
+  if (menuButton) menuButton.setAttribute('aria-expanded', 'false');
+}
+
+document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+  window.toggleSidebar();
+});
+document.getElementById('sidebar-backdrop').addEventListener('click', () => closeSidebar());
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// MODALS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(modal => closeModal(modal.id));
+    closeSidebar();
+  }
+});
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PRODUCTS TABLE
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function statusBadge(status) {
+  if (status === 'Available') return `<span class="badge badge-success"><i class="fa fa-circle" style="font-size:7px"></i> ${status}</span>`;
+  if (status === 'Low Stock') return `<span class="badge badge-warning"><i class="fa fa-circle" style="font-size:7px"></i> ${status}</span>`;
+  return `<span class="badge badge-danger"><i class="fa fa-circle" style="font-size:7px"></i> ${status}</span>`;
+}
+
+function renderProducts(list) {
+  renderInventoryTable(list);
+}
+
+function adminRecordDate(value) {
+  if (!value) return null;
+  const date = value.toDate ? value.toDate() : new Date(value.seconds != null ? value.seconds * 1000 : value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+function renderInventoryTable(list, archived = false) {
+  const tbody = document.getElementById(archived ? 'archived-products-tbody' : 'products-tbody');
+  const escape = escapeReservationText;
+  if (!archived) document.getElementById('inventory-results').textContent = `${list.length} product${list.length === 1 ? '' : 's'} shown`;
+  tbody.innerHTML = list.map(product => {
+    const id = escape(JSON.stringify(String(product.id)));
+    const name = escape(product.name || 'Unnamed product');
+    const stock = Number(product.stock || 0);
+    const status = typeof window.productStatusLabel === 'function' ? window.productStatusLabel(product) : stock >= 5 ? 'Available' : stock > 0 ? 'Low Stock' : 'Out of Stock';
+    const image = product.imageUrl ? `<img src="${escape(product.imageUrl)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    const placeholder = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z M3 8l9 5 9-5 M12 13v8 M7.5 5.5l9 5V15"/></svg>';
+    const archivedDate = adminRecordDate(product.archivedAt);
+    const dateFormat = { year: 'numeric', month: 'short', day: 'numeric' };
+    const archiveInfo = archivedDate
+      ? `<time datetime="${archivedDate.toISOString()}">${archivedDate.toLocaleDateString('en-PH', dateFormat)}</time><small class="archive-expiry">Expires ${new Date(archivedDate.getTime() + 30 * 86400000).toLocaleDateString('en-PH', dateFormat)}</small>`
+      : '<span class="td-muted">Date unavailable</span>';
+    return `<tr>
+      <td data-label="Product" class="product-identity"><div class="product-cell"><div class="product-thumb">${image}${placeholder}</div><div><strong>${name}</strong><small>${escape(product.category || 'Uncategorized')}</small></div></div></td>
+      <td data-label="Unit price" class="price-cell"><span>&#8369;${Number(product.price || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+      <td data-label="Stock" class="quantity-cell"><span class="stock-count">${stock} <small>${stock === 1 ? 'unit' : 'units'}</small></span></td>
+      <td data-label="${archived ? 'Archived on' : 'Availability'}">${archived ? archiveInfo : statusBadge(status)}</td>
+      <td data-label="Actions"><div class="product-actions">${archived
+        ? `<button type="button" class="btn btn-outline btn-sm" aria-label="Restore ${name}" onclick='restoreProduct(${id})'><i class="fa fa-box-open" aria-hidden="true"></i> Restore</button><button type="button" class="btn btn-danger btn-sm" aria-label="Delete ${name} permanently" onclick='deleteArchivedProduct(${id})'><i class="fa fa-trash-can" aria-hidden="true"></i> Delete</button>`
+        : `<button type="button" class="btn btn-outline btn-sm" aria-label="Edit ${name}" onclick='editProduct(${id})'><i class="fa fa-pen" aria-hidden="true"></i> Edit</button><button type="button" class="btn btn-archive btn-sm" aria-label="Archive ${name}" onclick='archiveProduct(${id})'><i class="fa fa-box-archive" aria-hidden="true"></i> Archive</button>`}</div></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="5" class="empty-table"><strong>${archived ? 'No archived products' : 'No products to display'}</strong><span>${archived ? 'Products you archive will appear here.' : 'Add a product or adjust your search and status filter.'}</span></td></tr>`;
+}
+
+function filterProducts() {
+  const q = document.getElementById('product-search').value.toLowerCase();
+  const s = document.getElementById('product-status-filter').value;
+      const filtered = products.filter(p => p.archived !== true &&
+    String(p.name || '').toLowerCase().includes(q) &&
+    (s === '' || (typeof window.productStatusLabel === 'function' ? window.productStatusLabel(p) : p.status) === s)
+  );
+  if (typeof window.renderProducts === 'function') window.renderProducts(filtered);
+}
+
+function clearProductFilters() {
+  document.getElementById('product-search').value = '';
+  document.getElementById('product-status-filter').value = '';
+  filterProducts();
+}
+
+function openAddProduct() {
+  if (typeof window.clearPendingProductImageUpload === 'function') window.clearPendingProductImageUpload();
+  window.pendingProductImage = null;
+  ['add-product-name', 'add-product-price', 'add-product-stock'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.querySelector('#modal-add-product textarea').value = '';
+  document.getElementById('add-product-category').value = '';
+  document.getElementById('add-product-category').dataset.manual = 'false';
+  window.updateProductCategorySuggestion?.();
+  document.getElementById('add-product-status').value = 'Available';
+  document.getElementById('add-product-image').value = '';
+  document.getElementById('add-product-image-preview').style.display = 'none';
+  const submitButton = document.getElementById('add-product-submit');
+  if (submitButton) {
+    submitButton.disabled = false;
+    submitButton.dataset.productSubmitting = 'false';
+    submitButton.dataset.imageUploadBlocked = 'false';
+  }
+  setAddProductImageStatus('hidden');
+  openModal('modal-add-product');
+}
+
+function formatAddProductPrice(input) {
+  const raw = input.value;
+  const caret = input.selectionStart ?? raw.length;
+  const charsBeforeCaret = raw.slice(0, caret).replace(/[^\d.]/g, '').length;
+  let normalized = raw.replace(/,/g, '').replace(/[^\d.]/g, '');
+  const decimalIndex = normalized.indexOf('.');
+  if (decimalIndex !== -1) {
+    normalized = normalized.slice(0, decimalIndex + 1) + normalized.slice(decimalIndex + 1).replace(/\./g, '');
+  }
+  const [whole, ...decimalParts] = normalized.split('.');
+  const formattedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const formatted = decimalParts.length ? `${formattedWhole}.${decimalParts.join('')}` : formattedWhole;
+  input.value = formatted;
+  let seen = 0;
+  let nextCaret = 0;
+  while (nextCaret < formatted.length && seen < charsBeforeCaret) {
+    if (formatted[nextCaret] !== ',') seen += 1;
+    nextCaret += 1;
+  }
+  input.setSelectionRange(nextCaret, nextCaret);
+}
+
+function setAddProductImageStatus(state, message, progressValue = null) {
+  const status = document.getElementById('add-product-upload-status');
+  if (!status) return;
+  if (state === 'hidden') {
+    status.style.display = 'none';
+    status.className = 'product-upload-status';
+    return;
+  }
+  const label = document.getElementById('add-product-upload-status-label');
+  const detail = document.getElementById('add-product-upload-message');
+  const percent = document.getElementById('add-product-upload-percent');
+  const icon = document.getElementById('add-product-upload-status-icon');
+  const progress = document.getElementById('add-product-upload-progress');
+  const isUploading = state === 'uploading';
+  const isError = state === 'error';
+  const visibleProgress = isError ? 0 : Math.max(0, Math.min(100, Number(progressValue ?? (isUploading ? 0 : 100))));
+  const submitButton = document.getElementById('add-product-submit');
+  status.style.display = 'grid';
+  status.className = `product-upload-status${isUploading ? ' is-uploading' : ''}${isError ? ' is-error' : ''}`;
+  label.textContent = isUploading ? 'Uploading image' : isError ? 'Image needs attention' : 'Image ready';
+  detail.textContent = message || (isUploading ? 'Saving the image with your product...' : 'Your image is ready to be saved with this product.');
+  percent.textContent = isError ? 'Retry' : `${visibleProgress}%`;
+  icon.className = isUploading ? 'fa fa-spinner fa-spin' : isError ? 'fa fa-triangle-exclamation' : 'fa fa-circle-check';
+  progress.style.width = `${visibleProgress}%`;
+  if (submitButton) {
+    const isBlocked = isUploading || isError;
+    submitButton.dataset.imageUploadBlocked = String(isBlocked);
+    if (submitButton.dataset.productSubmitting !== 'true') submitButton.disabled = isBlocked;
+  }
+}
+
+function submitAddProduct() {
+  const reportAddProductError = (error) => {
+    console.error('Product add button failed', error);
+    showToast('danger', 'fa-triangle-exclamation', 'Product Not Added', 'Something went wrong while adding this product. Please check the browser console for details.');
+  };
+  if (typeof window.addProduct !== 'function') {
+    showToast('warning', 'fa-triangle-exclamation', 'Still Connecting', 'The product service is still loading. Please try again in a moment.');
+    return;
+  }
+  try {
+    return Promise.resolve(window.addProduct()).catch(reportAddProductError);
+  } catch (error) {
+    reportAddProductError(error);
+  }
+}
+
+function legacyAddProduct() {
+  const name = document.getElementById('add-product-name').value.trim();
+  const category = document.getElementById('add-product-category').value;
+  const price = parseFloat(document.getElementById('add-product-price').value.replace(/,/g, ''));
+  const stock = parseInt(document.getElementById('add-product-stock').value, 10);
+  const status = document.getElementById('add-product-status').value;
+  const description = document.querySelector('#modal-add-product textarea').value.trim();
+
+  if (!name || !category || !Number.isFinite(price) || !Number.isInteger(stock) || stock < 0 || stock > 10 || !status || !description) {
+    showToast('warning', 'fa-triangle-exclamation', 'Check Product Details', 'Complete every field and enter a stock quantity from 0 to 10.');
+    return;
+  }
+  if (typeof window.storeAdminProductCreate !== 'function') return;
+  renderProducts(products);
+  renderAnalytics();
+  closeModal('modal-add-product');
+  showToast('success', 'fa-circle-check', 'Product Added', `${name} has been added successfully.`);
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  currentEditId = id;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-price').value = p.price;
+  document.getElementById('edit-stock').value = p.stock;
+  document.getElementById('edit-status').value = p.status;
+  openModal('modal-edit-product');
+}
+
+function saveEdit() {
+  const p = products.find(x => x.id === currentEditId);
+  if (typeof window.storeAdminProductUpdate !== 'function') return;
+  renderProducts(products);
+  renderAnalytics();
+  closeModal('modal-edit-product');
+  showToast('success', 'fa-circle-check', 'Product Updated', `${p.name} has been updated.`);
+}
+
+function archiveProduct(id, name) {
+  currentArchiveId = id;
+  document.getElementById('archive-product-name').textContent = name;
+  openModal('modal-archive');
+}
+
+function confirmArchive() {
+  if (typeof window.storeAdminProductArchive !== 'function') return;
+  return window.storeAdminProductArchive(currentArchiveId);
+}
+
+function previewEditProductImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!isSupportedProductImage(file)) {
+    showToast('warning', 'fa-image', 'Invalid File', 'Please select a PNG or JPG image.');
+    e.target.value = '';
+    return;
+  }
+  if (!isProductImageWithinLimit(file)) {
+    showToast('warning', 'fa-file-circle-exclamation', 'Image Too Large', 'Please choose an image no larger than 10MB.');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('edit-product-preview-src').src = ev.target.result;
+    document.getElementById('edit-product-image-name').textContent = file.name;
+    document.getElementById('edit-product-image-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewProductImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!isSupportedProductImage(file)) {
+    showToast('warning', 'fa-image', 'Invalid File', 'Please select a PNG or JPG image.');
+    e.target.value = '';
+    return;
+  }
+  if (!isProductImageWithinLimit(file)) {
+    showToast('warning', 'fa-file-circle-exclamation', 'Image Too Large', 'Please choose an image no larger than 10MB.');
+    e.target.value = '';
+    return;
+  }
+  window.pendingProductImage = file;
+  setAddProductImageStatus('uploading', 'Starting secure image upload...', 0);
+  if (typeof window.prepareProductImageUpload !== 'function') {
+    window.pendingProductImage = null;
+    e.target.value = '';
+    setAddProductImageStatus('error', 'The image service is still loading. Please select the image again in a moment.');
+    return;
+  }
+  window.prepareProductImageUpload(file);
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('add-product-preview-src').src = ev.target.result;
+    document.getElementById('add-product-image-name').textContent = file.name;
+    document.getElementById('add-product-image-preview').style.display = 'block';
+  };
+  reader.onerror = () => {
+    window.pendingProductImage = null;
+    window.clearPendingProductImageUpload?.();
+    e.target.value = '';
+    setAddProductImageStatus('error', 'The selected image could not be read. Please choose it again.');
+  };
+  reader.readAsDataURL(file);
+}
+
+function isSupportedProductImage(file) {
+  const typeIsSupported = ['image/png', 'image/jpeg'].includes(String(file.type || '').toLowerCase());
+  const nameIsSupported = /\.(png|jpe?g)$/i.test(file.name || '');
+  return typeIsSupported || nameIsSupported;
+}
+
+function isProductImageWithinLimit(file) {
+  return Number(file?.size || 0) <= 10 * 1024 * 1024;
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// RESERVATIONS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+let currentResTab = 'pending';
+window.currentResTab = currentResTab;
+
+function switchTab(section, el) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (section === 'reservations') {
+    currentResTab = el.dataset.tab;
+    window.currentResTab = currentResTab;
+    renderReservations(currentResTab);
+  }
+}
+
+function reservationActions(tab, reservation) {
+  if (tab === 'pending' || tab === 'waiting') return `
+    <div class="actions-row">
+      <button class="btn btn-success btn-sm" onclick="updateReservationStatus(${escapeReservationText(JSON.stringify(String(reservation.id)))},'Accepted')"><i class="fa fa-check"></i> Accept</button>
+      <button class="btn btn-danger btn-sm" onclick="updateReservationStatus(${escapeReservationText(JSON.stringify(String(reservation.id)))},'Rejected')"><i class="fa fa-times"></i> Reject</button>
+    </div>`;
+  if (tab === 'accepted' && reservation.status === 'Accepted') return `
+    <div class="actions-row">
+      <button class="btn btn-success btn-sm" onclick="updateReservationStatus(${escapeReservationText(JSON.stringify(String(reservation.id)))},'Completed')"><i class="fa fa-check-circle"></i> Mark claimed</button>
+    </div>`;
+  return `<span class="td-muted" style="font-size:12px">No actions</span>`;
+}
+
+function reservationStatusBadge(status) {
+  const map = { Pending: 'badge-warning', Accepted: 'badge-success', Completed: 'badge-info', Rejected: 'badge-danger', Cancelled: 'badge-danger', 'Waiting List': 'badge-info' };
+  const normalizedStatus = status || 'Pending';
+  const tone = Object.hasOwn(map, normalizedStatus) ? map[normalizedStatus] : 'badge-warning';
+  return `<span class="badge ${tone}">${escapeReservationText(normalizedStatus)}</span>`;
+}
+
+function escapeReservationText(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;',
+  }[character]));
+}
+
+function renderReservations(tab) {
+  const list = reservations[tab] || [];
+  const wrap = document.getElementById('reservations-table-wrap');
+  wrap.innerHTML = `
+    <table>
+        <thead><tr><th>#</th><th>User</th><th>Product</th><th>Date</th><th>Note</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${list.map((r, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td><strong>${escapeReservationText(r.user || r.userEmail || 'Customer')}</strong></td>
+            <td>${escapeReservationText(r.product || r.productName || 'Unnamed product')}</td>
+            <td>${escapeReservationText(r.date || 'Not specified')}</td>
+            <td>${escapeReservationText(r.note || '—')}</td>
+            <td>${reservationStatusBadge(r.status)}</td>
+            <td>${reservationActions(tab, r)}</td>
+          </tr>`).join('')}
+        ${list.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:28px">No records found.</td></tr>' : ''}
+      </tbody>
+    </table>`;
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// REVIEWS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function renderStars(n) {
+  n = Number.isInteger(n) && n >= 1 && n <= 5 ? n : 0;
+  return '<span class="stars">&#9733;</span>'.repeat(n) +
+    '<span style="color:var(--text-muted)">&#9734;</span>'.repeat(5 - n);
+}
+
+let activeReportReviewId = null;
+let reportingReview = false;
+const acceptingReviewIds = new Set();
+
+function renderReviews() {
+  const reviewList = Array.isArray(window.storeReviews) ? window.storeReviews : reviews;
+  const visibleReviews = reviewList.slice()
+    .sort((a, b) => (adminRecordDate(b.createdAt)?.getTime() || 0) - (adminRecordDate(a.createdAt)?.getTime() || 0));
+  const ratedReviews = reviewList.filter(r => Number.isInteger(r.rating) && r.rating >= 1 && r.rating <= 5);
+  const average = ratedReviews.length ? (ratedReviews.reduce((sum, r) => sum + r.rating, 0) / ratedReviews.length).toFixed(1) : null;
+  document.getElementById('reviews-summary').textContent = reviewList.length
+    ? `${reviewList.length} review${reviewList.length === 1 ? '' : 's'}${average ? ` · ${average} / 5 average` : ''}` : 'No reviews yet';
+  document.getElementById('reviews-tbody').innerHTML = visibleReviews.map(r => {
+    const customer = r.user || r.userEmail || 'Customer';
+    const date = adminRecordDate(r.createdAt);
+    const validRating = Number.isInteger(r.rating) && r.rating >= 1 && r.rating <= 5;
+    const id = escapeReservationText(String(r.id));
+    const reported = r.reviewReport?.status === 'pending';
+    const approved = ['approved', 'published'].includes(String(r.status || '').toLowerCase());
+    const reviewState = approved ? 'Approved'
+      : reported ? 'Reported'
+        : r.flagged === true || r.proofFlagged === true ? 'Flagged' : 'Pending';
+    const stateTone = { Approved: 'success', Reported: 'warning', Flagged: 'danger', Pending: 'grey' }[reviewState];
+    return `
+    <tr>
+      <td data-label="Customer" class="review-customer"><div class="customer-cell"><span class="customer-avatar" aria-hidden="true">${escapeReservationText(String(customer).trim().charAt(0).toUpperCase() || 'C')}</span><div><strong>${escapeReservationText(customer)}</strong>${date ? `<time datetime="${date.toISOString()}">${date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</time>` : ''}<span class="badge badge-${stateTone} review-state">${reviewState}</span>${approved && reported ? '<span class="badge badge-warning review-state">Reported</span>' : ''}</div></div></td>
+      <td data-label="Rating"><div class="review-rating"><span aria-hidden="true">${renderStars(r.rating)}</span><strong>${validRating ? `${r.rating} / 5` : 'Not rated'}</strong></div></td>
+      <td data-label="Feedback" class="review-feedback">${r.product && r.product !== 'Shop experience' ? `<span class="review-product">${escapeReservationText(r.product)}</span>` : ''}<p>${escapeReservationText(r.review || 'No written feedback.')}</p></td>
+      <td data-label="Actions" class="review-actions-cell">
+        <div class="review-actions">
+          ${/^(https?:|data:image\/)/i.test(String(r.proofFileUrl || r.proofFile || '')) ? `<button type="button" class="btn btn-outline btn-sm" data-review-proof="${id}"><i class="fa fa-receipt" aria-hidden="true"></i> View proof</button>` : '<span class="td-muted">No proof attached</span>'}
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" class="empty-table"><strong>${reviewList.length ? 'No reviews in this filter' : 'No customer reviews yet'}</strong><span>${reviewList.length ? 'Choose another filter to see more feedback.' : 'Customer ratings and feedback will appear here when submitted.'}</span></td></tr>`;
+}
+
+document.getElementById('reviews-tbody').addEventListener('click', event => {
+  const proofButton = event.target.closest('[data-review-proof]');
+  if (proofButton) return openReviewProof(proofButton.dataset.reviewProof);
+});
+
+document.getElementById('review-approve-button').addEventListener('click', () => {
+  if (activeReportReviewId) approveStoreReview(activeReportReviewId);
+});
+
+function updateReviewApproval(review) {
+  const button = document.getElementById('review-approve-button');
+  const label = document.getElementById('review-approve-label');
+  if (!button || !review || String(review.id) !== activeReportReviewId) return;
+  const accepted = ['approved', 'published'].includes(String(review.status || '').toLowerCase());
+  const underSuperAdminReview = review.reviewReport?.status === 'pending' || review.flagged === true || review.proofFlagged === true;
+  const accepting = acceptingReviewIds.has(String(review.id));
+  button.disabled = accepted || underSuperAdminReview || accepting || reportingReview;
+  label.textContent = accepted ? 'Approved' : underSuperAdminReview ? 'Under review' : accepting ? 'Approving...' : 'Approve';
+}
+
+function updateReviewReportState(review) {
+  if (!review || String(review.id) !== activeReportReviewId) return;
+  const reported = review.reviewReport?.status === 'pending';
+  const busy = reportingReview || acceptingReviewIds.has(String(review.id));
+  document.getElementById('review-report-submit').disabled = reported || busy;
+  document.getElementById('review-report-submit-label').textContent = reported ? 'Sent' : reportingReview ? 'Sending...' : 'Report';
+  document.getElementById('review-report-clear').disabled = reported || busy;
+  document.querySelectorAll('input[name="review-report-reason"]').forEach(input => { input.disabled = reported || busy; });
+  document.getElementById('review-report-other').disabled = reported || busy;
+  if (reported) {
+    document.getElementById('review-report-clear').hidden = true;
+    document.getElementById('review-report-status').textContent = 'Report sent. The superadmin will review this content.';
+  }
+}
+
+function reviewActionErrorMessage(error) {
+  const code = String(error?.code || '').replace(/^functions\//, '');
+  if (['internal', 'unavailable', 'deadline-exceeded'].includes(code)) {
+    return 'The review could not be saved. Check your connection and try again.';
+  }
+  if (code === 'unauthenticated') return 'Your session has expired. Please sign in again.';
+  return error?.message || 'The review action could not be saved. Please try again.';
+}
+
+async function approveStoreReview(id) {
+  const reviewId = String(id);
+  if (acceptingReviewIds.has(reviewId) || reportingReview) return;
+  acceptingReviewIds.add(reviewId);
+  const reviewsList = Array.isArray(window.storeReviews) ? window.storeReviews : reviews;
+  updateReviewApproval(reviewsList.find(item => String(item.id) === reviewId));
+  updateReviewReportState(reviewsList.find(item => String(item.id) === reviewId));
+  try {
+    if (!window.storeReviewActions) throw new Error('Review actions are still loading. Please try again in a moment.');
+    await window.storeReviewActions.approve(reviewId);
+    const review = reviewsList.find(item => String(item.id) === reviewId);
+    if (review) {
+      review.status = 'Approved';
+      review.approvedAt = new Date();
+    }
+    updateReviewApproval(review);
+    renderReviews();
+    window.showToast('success', 'fa-circle-check', 'Review approved', 'This review is now approved.');
+  } catch (error) {
+    window.showToast('error', 'fa-circle-exclamation', 'Could not approve review', reviewActionErrorMessage(error));
+  } finally {
+    acceptingReviewIds.delete(reviewId);
+    updateReviewApproval(reviewsList.find(item => String(item.id) === reviewId));
+    updateReviewReportState(reviewsList.find(item => String(item.id) === reviewId));
+  }
+}
+
+function openReviewProof(id) {
+  if (reportingReview || acceptingReviewIds.size) return;
+  const review = (Array.isArray(window.storeReviews) ? window.storeReviews : reviews).find(item => String(item.id) === String(id));
+  if (!review) return;
+  const image = document.getElementById('review-proof-image');
+  const message = document.getElementById('review-proof-message');
+  const candidate = review?.proofFileUrl || review?.proofFile || '';
+  const url = /^(https?:|data:image\/)/i.test(String(candidate)) ? candidate : '';
+  activeReportReviewId = String(id);
+  image.removeAttribute('src');
+  image.style.display = 'none';
+  message.style.display = 'block';
+  message.textContent = url ? 'Loading proof image...' : 'No proof of purchase was attached to this review.';
+  image.onload = () => { image.style.display = 'block'; message.style.display = 'none'; };
+  image.onerror = () => { image.style.display = 'none'; message.style.display = 'block'; message.textContent = 'The proof image could not be loaded.'; };
+  document.getElementById('review-report-form').reset();
+  document.getElementById('review-report-clear').hidden = true;
+  document.getElementById('review-report-clear').disabled = false;
+  document.getElementById('review-report-other-wrap').hidden = true;
+  document.getElementById('review-report-other').style.height = '';
+  document.getElementById('review-report-submit-label').textContent = 'Report';
+  document.getElementById('review-report-status').textContent = '';
+  document.getElementById('review-report-submit').disabled = false;
+  document.querySelectorAll('input[name="review-report-reason"]').forEach(input => { input.disabled = false; });
+  document.getElementById('review-report-other').disabled = false;
+  reportingReview = false;
+  updateReviewApproval(review);
+  updateReviewReportState(review);
+  if (url) image.src = url;
+  openModal('modal-proof');
+}
+
+document.getElementById('review-report-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (reportingReview || !activeReportReviewId || acceptingReviewIds.has(activeReportReviewId)) return;
+  const reviewId = activeReportReviewId;
+  const review = (Array.isArray(window.storeReviews) ? window.storeReviews : reviews).find(item => String(item.id) === reviewId);
+  if (!review || review.reviewReport?.status === 'pending') return;
+  const selectedReason = document.querySelector('input[name="review-report-reason"]:checked');
+  const status = document.getElementById('review-report-status');
+  if (!selectedReason) { status.textContent = 'Choose a reason for the report.'; return; }
+  const comment = selectedReason.value === 'Other' ? document.getElementById('review-report-other').value.trim() : '';
+  const reason = comment ? `${selectedReason.value}: ${comment}` : selectedReason.value;
+  reportingReview = true;
+  updateReviewApproval(review);
+  updateReviewReportState(review);
+  status.textContent = '';
+  try {
+    if (!window.storeReviewActions) throw new Error('Review actions are still loading. Please try again in a moment.');
+    await window.storeReviewActions.report(reviewId, { target: 'proof', reason });
+    const reportedReview = (Array.isArray(window.storeReviews) ? window.storeReviews : reviews).find(item => String(item.id) === reviewId);
+    if (reportedReview) reportedReview.reviewReport = { status: 'pending', target: 'proof', reason };
+    updateReviewApproval(reportedReview);
+    renderReviews();
+    status.textContent = 'Report sent. The superadmin will review this content.';
+    document.getElementById('review-report-submit-label').textContent = 'Sent';
+    document.getElementById('review-report-clear').hidden = true;
+    document.querySelectorAll('input[name="review-report-reason"]').forEach(input => { input.disabled = true; });
+    document.getElementById('review-report-other').disabled = true;
+    window.showToast('success', 'fa-circle-check', 'Report sent', 'The review was sent to the superadmin queue.');
+  } catch (error) {
+    status.textContent = reviewActionErrorMessage(error);
+  } finally {
+    reportingReview = false;
+    const currentReview = (Array.isArray(window.storeReviews) ? window.storeReviews : reviews).find(item => String(item.id) === reviewId);
+    updateReviewApproval(currentReview);
+    updateReviewReportState(currentReview);
+  }
+});
+function resizeReviewComment() {
+  const comment = document.getElementById('review-report-other');
+  if (!comment.getClientRects().length) return;
+  comment.style.height = 'auto';
+  const style = window.getComputedStyle(comment);
+  const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+  comment.style.height = `${Math.ceil(comment.scrollHeight + borders)}px`;
+}
+document.getElementById('review-report-other').addEventListener('input', resizeReviewComment);
+window.addEventListener('resize', resizeReviewComment);
+document.getElementById('review-report-clear').addEventListener('click', () => {
+  const selected = document.querySelector('input[name="review-report-reason"]:checked');
+  if (selected) selected.checked = false;
+  document.getElementById('review-report-clear').hidden = true;
+  document.getElementById('review-report-other-wrap').hidden = true;
+  const comment = document.getElementById('review-report-other');
+  comment.value = '';
+  comment.style.height = '';
+  document.getElementById('review-report-status').textContent = '';
+});
+document.querySelectorAll('input[name="review-report-reason"]').forEach(input => input.addEventListener('change', event => {
+  const isOther = event.target.value === 'Other';
+  document.getElementById('review-report-clear').hidden = false;
+  document.getElementById('review-report-other-wrap').hidden = !isOther;
+  if (isOther) resizeReviewComment();
+  else {
+    const comment = document.getElementById('review-report-other');
+    comment.value = '';
+    comment.style.height = '';
+  }
+  document.getElementById('review-report-status').textContent = '';
+}));
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ANALYTICS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function renderAnalytics() {
+  const activeProducts = products.filter(product => product.archived !== true);
+  const allReservations = Object.values(reservations).flat();
+  const reservationCounts = allReservations.reduce((counts, reservation) => {
+    const productName = reservation.product || reservation.productName || 'Unnamed product';
+    counts[productName] = (counts[productName] || 0) + 1;
+    return counts;
+  }, {});
+  const metricValue = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+  const reserved = Object.entries(reservationCounts).map(([label, value]) => ({ label, numericValue: value, unit: 'reservation' })).sort((a, b) => b.numericValue - a.numericValue).slice(0, 5);
+  const favoriteState = window.storeFavoriteCounts || { status: 'loading', counts: [] };
+  const favoriteCounts = new Map(favoriteState.counts.map(item => [item.productId, item.count]));
+  const favs = activeProducts.map(p => ({ label: p.name || 'Unnamed product', numericValue: metricValue(favoriteCounts.get(String(p.id))), unit: 'favorite' })).filter(item => item.numericValue > 0).sort((a, b) => b.numericValue - a.numericValue).slice(0, 5);
+  const totalViews = activeProducts.reduce((sum, product) => sum + metricValue(product.views), 0);
+  const summary = document.getElementById('analytics-summary');
+  summary.innerHTML = [
+    ['fa-boxes-stacked', 'Products listed', activeProducts.length, 'Active products in your catalog'],
+    ['fa-eye', 'Total views', totalViews, 'Product pages opened'],
+    ['fa-bookmark', 'Reservations', allReservations.length, 'Across all statuses'],
+    ['fa-star', 'Reviews received', reviews.length, 'Customer feedback'],
+  ].map(item => `<div class="analytics-summary-card"><div class="analytics-summary-icon"><i class="fa ${item[0]}"></i></div><div><span>${item[1]}</span><strong>${item[2].toLocaleString()}</strong><small>${item[3]}</small></div></div>`).join('');
+  function renderList(data, el, emptyTitle, emptyMessage) {
+    const target = document.getElementById(el);
+    if (!data.length) {
+      target.innerHTML = `<div class="analytics-empty"><i class="fa fa-chart-line"></i><span>${emptyTitle}</span><small>${emptyMessage}</small></div>`;
+      return;
+    }
+    const maxValue = Math.max(...data.map(item => item.numericValue), 1);
+    target.innerHTML = data.map((d, i) => `
+      <div class="analytics-item">
+        <div class="analytics-rank">${i + 1}</div>
+        <div class="analytics-label-group"><strong class="analytics-label">${escapeReservationText(d.label)}</strong><div class="analytics-meter" role="meter" aria-label="${escapeReservationText(d.label)} activity" aria-valuenow="${d.numericValue}" aria-valuemin="0" aria-valuemax="${maxValue}"><span style="width:${Math.max(8, Math.round((d.numericValue / maxValue) * 100))}%"></span></div></div>
+        <div class="analytics-value">${d.numericValue.toLocaleString()} <small>${d.unit}${d.numericValue === 1 ? '' : 's'}</small></div>
+      </div>`).join('');
+  }
+  renderList(reserved, 'most-reserved', 'No reservations yet.', 'Reservations will appear here when customers reserve a product.');
+  const favoritesTarget = document.getElementById('fav-count');
+  favoritesTarget.setAttribute('aria-busy', String(favoriteState.status === 'loading'));
+  if (favoriteState.status === 'ready') {
+    renderList(favs, 'fav-count', 'No favorites yet.', 'Favorites will appear as customers save products for later.');
+  } else if (favoriteState.status === 'error') {
+    renderList([], 'fav-count', 'Favorites unavailable.', 'Could not load favorite counts. Use Refresh favorites to try again.');
+  } else {
+    renderList([], 'fav-count', 'Loading favorites…', 'Getting current counts.');
+  }
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ALERTS PAGE
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function escapeAlertText(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;',
+  }[character]));
+}
+
+function renderAlertMarkup(alert, id, includeDismiss = false) {
+  const type = ['warning', 'danger', 'success', 'info'].includes(alert?.type) ? alert.type : 'info';
+  const icon = escapeAlertText(alert?.icon || 'fa-bell');
+  const kicker = escapeAlertText(alert?.time || (type === 'danger' ? 'Critical alert' : type === 'warning' ? 'Needs attention' : type === 'success' ? 'Completed' : 'System update'));
+  const dismiss = includeDismiss
+    ? `<i class="fa fa-times alert-dismiss" role="button" tabindex="0" aria-label="Dismiss alert" onclick="event.stopPropagation(); dismissToast('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();dismissToast('${id}')}"></i>`
+    : '';
+  return `
+    <div class="alert-toast ${type}" id="${id}" style="position:relative">
+      <i class="fa ${icon} alert-icon"></i>
+      <div class="alert-text">
+        <div class="alert-kicker">${kicker}</div>
+        <div class="alert-title">${escapeAlertText(alert?.title || 'System alert')}</div>
+        <div class="alert-desc">${escapeAlertText(alert?.desc || '')}</div>
+        ${(alert?.recordedAt || alert?.time) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">${escapeAlertText(alert.recordedAt ? new Date(alert.recordedAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : alert.time)}</div>` : ''}
+      </div>
+      ${dismiss}
+    </div>`;
+}
+
+function renderAlertHistoryCard(alert, index) {
+  const type = ['warning', 'danger', 'success', 'info'].includes(alert?.type) ? alert.type : 'info';
+  const labels = { warning: 'Needs attention', danger: 'Critical', success: 'Success', info: 'Update' };
+  const icons = { warning: 'fa-triangle-exclamation', danger: 'fa-circle-exclamation', success: 'fa-check', info: 'fa-bell' };
+  const date = alert?.recordedAt ? new Date(alert.recordedAt) : null;
+  const validDate = date && Number.isFinite(date.getTime());
+  const dateText = validDate ? date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' }) : 'Date unavailable';
+  const timeText = validDate ? date.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) : '';
+  const source = alert?.time === 'Admin action' ? 'Admin action' : 'System notification';
+  return `
+    <article class="alert-history-card ${type}" id="alert-history-${index}">
+      <div class="alert-history-icon"><i class="fa ${icons[type]}" aria-hidden="true"></i></div>
+      <div class="alert-history-content">
+        <div class="alert-history-meta">
+          <span class="alert-history-label">${labels[type]}</span>
+          <span class="alert-history-source">${source}</span>
+        </div>
+        <h3>${escapeAlertText(alert?.title || 'System alert')}</h3>
+        <p>${escapeAlertText(alert?.desc || '')}</p>
+      </div>
+      <time class="alert-history-timestamp"${validDate ? ` datetime="${date.toISOString()}"` : ''}><span>${escapeAlertText(dateText)}</span><small>${escapeAlertText(timeText)}</small></time>
+    </article>`;
+}
+
+function filterAlertHistory(filter) {
+  if (!['all', 'attention', 'success', 'info'].includes(filter)) return;
+  alertHistoryFilter = filter;
+  renderAlertsPage();
+}
+
+function alertTimestamp(alert, fallbackIndex = 0) {
+  const timestamp = Number(alert?.recordedAt);
+  if (Number.isFinite(timestamp)) return timestamp;
+  const parsed = Date.parse(alert?.recordedAt || '');
+  return Number.isFinite(parsed) ? parsed : -fallbackIndex;
+}
+
+function toggleAlertHistorySort() {
+  alertHistorySort = alertHistorySort === 'newest' ? 'oldest' : 'newest';
+  renderAlertsPage();
+}
+
+function renderAlertsPage() {
+  const list = document.getElementById('alerts-list');
+  if (!list) return;
+  const category = alert => ['warning', 'danger'].includes(alert.type) ? 'attention' : alert.type === 'success' ? 'success' : 'info';
+  const visible = alertHistory
+    .map((alert, index) => ({ alert, index }))
+    .filter(({ alert }) => alertHistoryFilter === 'all' || category(alert) === alertHistoryFilter)
+    .sort((left, right) => {
+      const difference = alertTimestamp(right.alert, right.index) - alertTimestamp(left.alert, left.index);
+      return alertHistorySort === 'newest' ? difference : -difference;
+    })
+    .map(({ alert }) => alert);
+  const sortButton = document.getElementById('alert-history-sort');
+  if (sortButton) {
+    const newestFirst = alertHistorySort === 'newest';
+    sortButton.setAttribute('aria-label', `Sort alerts, ${newestFirst ? 'newest' : 'oldest'} first`);
+    sortButton.setAttribute('aria-pressed', String(newestFirst));
+    sortButton.querySelector('span').textContent = newestFirst ? 'Newest first' : 'Oldest first';
+    sortButton.querySelector('i').className = `fa ${newestFirst ? 'fa-arrow-down-wide-short' : 'fa-arrow-up-wide-short'}`;
+  }
+  document.querySelectorAll('[data-alert-filter]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.alertFilter === alertHistoryFilter));
+  });
+  document.querySelectorAll('[data-alert-filter-count]').forEach(count => {
+    const filter = count.dataset.alertFilterCount;
+    count.textContent = filter === 'all' ? alertHistory.length : alertHistory.filter(alert => category(alert) === filter).length;
+  });
+  const clearButton = document.getElementById('clear-alert-history');
+  if (clearButton) clearButton.disabled = !alertHistory.length;
+  document.getElementById('alerts-result-count').textContent = `Showing ${visible.length} of ${alertHistory.length} saved alerts`;
+  if (!visible.length) {
+    const hasHistory = alertHistory.length > 0;
+    list.innerHTML = `<div class="alert-history-empty"><div class="alert-history-empty-icon"><i class="fa ${hasHistory ? 'fa-filter-circle-xmark' : 'fa-bell'}" aria-hidden="true"></i></div><strong>${hasHistory ? 'No alerts in this category' : 'A fresh start for your activity'}</strong><span>${hasHistory ? 'Choose another filter to explore your store activity.' : 'Store updates and actions will appear here as they happen.'}</span>${hasHistory ? '<button class="btn btn-outline btn-sm" type="button" onclick="filterAlertHistory(\'all\')">Show all activity</button>' : ''}</div>`;
+  } else {
+    list.innerHTML = visible.map(renderAlertHistoryCard).join('');
+  }
+  updateAlertCount();
+}
+
+function updateAlertCount() {
+  const count = document.getElementById('alert-count');
+  const total = alertHistory.length;
+  if (count) count.textContent = total > 99 ? '99+' : total;
+  const summary = document.getElementById('alert-history-summary');
+  if (summary) summary.textContent = total ? `${total} saved alert${total === 1 ? '' : 's'} in this store` : 'No saved alerts yet.';
+}
+
+window.setAdminAlerts = function setAdminAlerts(items) {
+  alertsData.splice(0, alertsData.length, ...(Array.isArray(items) ? items : []));
+  alertsData.forEach(alert => recordAlertHistory(alert, true));
+  renderAlertsPage();
+}
+
+function clearAlerts() {
+  if (!alertHistory.length) return;
+  openModal('modal-clear-alert-history');
+}
+
+function confirmClearAlerts() {
+  closeModal('modal-clear-alert-history');
+  alertsData.splice(0, alertsData.length);
+  alertHistory.splice(0, alertHistory.length);
+  saveAlertHistory();
+  renderAlertsPage();
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// TOAST NOTIFICATIONS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+const NOTIFICATION_LIFETIME_MS = 3000;
+const NOTIFICATION_EXIT_MS = 240;
+let notificationSequence = 0;
+
+function scheduleToastDismissal(id) {
+  setTimeout(() => dismissToast(id), NOTIFICATION_LIFETIME_MS - NOTIFICATION_EXIT_MS);
+}
+
+function showToast(type, icon, title, desc) {
+  recordAlertHistory({ type, icon, title, desc, time: 'Admin action' });
+  renderAlertsPage();
+  const panel = document.getElementById('alerts-panel');
+  const id = `toast-${Date.now()}-${++notificationSequence}`;
+  const div = document.createElement('div');
+  div.className = `alert-toast ${type}`;
+  div.id = id;
+  div.setAttribute('role', 'status');
+  div.setAttribute('aria-live', 'polite');
+  const toastLabel = type === 'danger' ? 'Attention' : type === 'warning' ? 'Needs attention' : type === 'success' ? 'Saved' : 'System update';
+  const escapeToastText = value => String(value ?? '').replace(/[&<>'"]/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;',
+  }[character]));
+  div.innerHTML = `
+    <i class="fa ${icon} alert-icon"></i>
+    <div class="alert-text">
+      <div class="alert-kicker">${toastLabel} · now</div>
+      <div class="alert-title">${escapeToastText(title)}</div>
+      <div class="alert-desc">${escapeToastText(desc)}</div>
+    </div>
+    <i class="fa fa-times alert-dismiss" onclick="dismissToast('${id}')"></i>`;
+  panel.appendChild(div);
+  scheduleToastDismissal(id);
+}
+
+function dismissToast(id) {
+  const toast = document.getElementById(id);
+  if (!toast || toast.classList.contains('is-leaving')) return;
+  toast.classList.add('is-leaving');
+  setTimeout(() => toast.remove(), NOTIFICATION_EXIT_MS);
+}
+
+function showSystemAlerts() {
+  const panel = document.getElementById('alerts-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  if (!alertsData.length) {
+    showToast('info', 'fa-bell-slash', 'No Alerts', 'There are no new alerts to display.');
+    return;
+  }
+  alertsData.forEach((alert, index) => {
+    const id = `system-alert-${Date.now()}-${index}`;
+    panel.insertAdjacentHTML('beforeend', renderAlertMarkup(alert, id, true));
+    scheduleToastDismissal(id);
+  });
+}
+
+document.getElementById('alert-trigger').addEventListener('click', () => {
+  showSystemAlerts();
+});
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// CHARTS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+function initCharts() {
+  if (typeof Chart === "undefined") return;
+  const brand = '#064787';
+  const green = '#16a34a';
+  const neutral = '#64748b';
+  const red = '#dc2626';
+  const font = { family: getComputedStyle(document.body).fontFamily, size: 11 };
+
+  // Fit labels to the actual canvas width, including names without spaces.
+  function wrapChartText(chart, value, maxWidth, maxLines = Infinity, size = 11) {
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.font = `500 ${size}px ${font.family}`;
+    let remaining = String(value || '').trim();
+    const lines = [];
+    while (remaining && lines.length < maxLines) {
+      let end = remaining.length;
+      const suffix = lines.length === maxLines - 1 ? '…' : '';
+      while (end > 1 && ctx.measureText(remaining.slice(0, end) + (end < remaining.length ? suffix : '')).width > maxWidth) end--;
+      if (end < remaining.length) {
+        const space = remaining.lastIndexOf(' ', end);
+        if (space > 0) end = space;
+      }
+      const line = remaining.slice(0, end).trim();
+      remaining = remaining.slice(end).trim();
+      lines.push(line + (remaining && lines.length === maxLines - 1 ? '…' : ''));
+    }
+    ctx.restore();
+    return lines;
+  }
+
+  const countTicks = { precision: 0, maxTicksLimit: 5, color: '#64748b', padding: 8, font };
+  const tooltipStyle = {
+    backgroundColor: '#172b46', padding: 12, cornerRadius: 8, displayColors: false,
+    titleFont: { ...font, size: 12, weight: '500' },
+    bodyFont: { ...font, size: 12 },
+  };
+
+  const sentimentPercentageLabels = {
+    id: 'sentimentPercentageLabels',
+    afterDatasetsDraw(chart) {
+      const dataset = chart.data.datasets[0];
+      const total = (dataset?.data || []).reduce((sum, value) => sum + Number(value || 0), 0);
+      if (!total) return;
+
+      const ctx = chart.ctx;
+      chart.getDatasetMeta(0).data.forEach((arc, index) => {
+        const value = Number(dataset.data[index] || 0);
+        if (!value) return;
+        const percentage = Math.round((value / total) * 100);
+        const position = arc.getCenterPoint();
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.font = `700 12px ${font.family}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${percentage}%`, position.x, position.y);
+        ctx.restore();
+      });
+    },
+  };
+
+  const reservedChart = new Chart(document.getElementById('chartReserved'), {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Reservations',
+        data: [],
+        backgroundColor: brand,
+        borderRadius: 6,
+        borderSkipped: false,
+        maxBarThickness: 20,
+        categoryPercentage: 0.7,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 4, right: 12 } },
+      interaction: { mode: 'nearest', axis: 'y', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle, callbacks: {
+          title(items) { return wrapChartText(items[0].chart, items[0].label, Math.max(120, items[0].chart.width - 40), Infinity, 12); },
+          label(context) { return `${context.parsed.x} reservation${context.parsed.x === 1 ? '' : 's'}`; },
+        } },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          suggestedMax: 1,
+          border: { display: false },
+          grid: { color: '#edf1f6', drawTicks: false },
+          ticks: countTicks,
+        },
+        y: {
+          border: { display: false },
+          grid: { display: false },
+          ticks: {
+            font: { ...font, size: 12, weight: '500', lineHeight: 1.4 }, color: '#40516b', autoSkip: false, padding: 10, crossAlign: 'far',
+            callback(value) { return wrapChartText(this.chart, this.getLabelForValue(value), Math.min(150, this.chart.width * 0.36), 1, 11); },
+          },
+        },
+      },
+    },
+  });
+
+  const weeklyChart = new Chart(document.getElementById('chartWeekly'), {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Reservations',
+        data: [],
+        borderColor: brand,
+        backgroundColor: 'rgba(6,71,135,0.05)',
+        fill: true,
+        tension: 0.2,
+        cubicInterpolationMode: 'monotone',
+        borderWidth: 2,
+        pointBackgroundColor: brand,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointHitRadius: 16,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 10, right: 10 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle, callbacks: {
+          title(items) { return `Week of ${items[0].label}`; },
+          label(context) { return `${context.parsed.y} reservation${context.parsed.y === 1 ? '' : 's'}`; },
+        } },
+      },
+      scales: {
+        x: {
+          border: { display: false },
+          grid: { display: false },
+          ticks: { font, color: '#64748b', maxRotation: 0, minRotation: 0, maxTicksLimit: 6, padding: 10 },
+        },
+        y: {
+          beginAtZero: true,
+          suggestedMax: 1,
+          grace: '10%',
+          border: { display: false },
+          grid: { color: '#edf1f6', drawTicks: false },
+          ticks: countTicks,
+        },
+      },
+    },
+  });
+
+  const sentimentChart = new Chart(document.getElementById('chartSentiment'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Positive reviews', 'Neutral reviews', 'Negative reviews'],
+      datasets: [{
+        label: 'Review sentiment',
+        data: [],
+        backgroundColor: [green, neutral, red],
+        borderColor: '#fff',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }],
+    },
+    plugins: [sentimentPercentageLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: { font: { ...font, size: 12 }, boxWidth: 12, padding: 18 },
+        },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const values = context.dataset.data;
+              const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+              const percentage = total ? Math.round((Number(context.raw) / total) * 100) : 0;
+              return `${context.label}: ${context.raw} (${percentage}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  window.storeAdminCharts = { reservedChart, weeklyChart, sentimentChart };
+  window.updateStoreAdminCharts = ({ productLabels = [], productValues = [], weekLabels = [], weeklyValues = [], sentimentValues } = {}) => {
+    reservedChart.data.labels = productLabels;
+    reservedChart.data.datasets[0].data = productValues;
+    reservedChart.update();
+    weeklyChart.data.labels = weekLabels;
+    weeklyChart.data.datasets[0].data = weeklyValues;
+    weeklyChart.update();
+
+    if (Array.isArray(sentimentValues)) window.updateStoreSentimentChart(sentimentValues);
+  };
+  window.updateStoreSentimentChart = (sentimentValues) => {
+    if (!Array.isArray(sentimentValues)) return;
+    sentimentChart.data.datasets[0].data = sentimentValues;
+    sentimentChart.update();
+  };
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PERMITS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+// Live permit form and history are loaded from store-permits.js.
+
+renderProducts(products);
+renderReservations('pending');
+renderReviews();
+renderAnalytics();
+renderAlertsPage();
+initCharts();
+
+</script>
+<script src="admin-ui.js?v=20261020-workspace"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-functions-compat.js"></script>
+<script src="../backend/config/firebase-config.js"></script>
+<script src="firebase-config.js?v=20261023"></script>
+<script src="../backend/services/presence.js"></script>
+<script src="presence.js"></script>
+<script src="../backend/domain/reservations.js"></script>
+<script src="../backend/services/admin.js?v=20261111-free-review-actions"></script>
+<script src="../backend/services/permits.js?v=20261025-permits"></script>
+<script src="store-permits.js?v=20261025-permits"></script>
+<script src="../backend/services/product-categories.js"></script>
+<script>
+(() => {
+  const name = document.getElementById('add-product-name');
+  const description = document.querySelector('#modal-add-product textarea');
+  const category = document.getElementById('add-product-category');
+  const hint = document.getElementById('add-product-category-hint');
+  if (!name || !description || !category || !hint || !window.techKnowProductCategories) return;
+  window.updateProductCategorySuggestion = () => {
+    if (category.dataset.manual === 'true') return;
+    const suggestion = window.techKnowProductCategories.suggestCategory(name.value, description.value);
+    if (!suggestion.category) {
+      hint.textContent = 'Enter a product name or description for a category suggestion.';
+      category.value = '';
+      return;
+    }
+    category.value = suggestion.category;
+    hint.textContent = `Suggested category: ${suggestion.category}. Review and change it if needed.`;
+  };
+  category.addEventListener('change', () => {
+    category.dataset.manual = 'true';
+    hint.textContent = category.value ? 'Category selected. You can change it anytime.' : 'Select a category before saving.';
+  });
+  name.addEventListener('input', window.updateProductCategorySuggestion);
+  description.addEventListener('input', window.updateProductCategorySuggestion);
+})();
+</script>
+<script src="../backend/dashboard-data.js?v=20261111-free-review-actions"></script>
+<script type="module" src="nlp-summary.js?v=20261020-hybrid-bert"></script>
+</body>
+</html>

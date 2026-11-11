@@ -1,0 +1,58 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function profile() { return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data; }
+    function active() {
+      return request.auth != null
+        && !(profile().get('status', 'Active').lower() in ['suspended', 'banned', 'disabled'])
+        && profile().get('adminOperationId', null) == null;
+    }
+    function admin() {
+      return active() && request.auth.uid == 'techknow-superadmin'
+        && request.auth.token.get('superAdmin', false) == true
+        && profile().role == 'Super Admin' && profile().status == 'Active';
+    }
+    function storeOwner(storeId) {
+      let store = firestore.get(/databases/(default)/documents/stores/$(storeId)).data;
+      return active() && profile().get('role', '') == 'Store Admin'
+        && profile().get('storeId', request.auth.uid) == storeId
+        && request.auth.uid in [store.get('ownerId', ''), store.get('ownerUid', ''), store.get('uid', '')]
+        && !(store.get('status', 'Active').lower() in ['suspended', 'banned', 'disabled'])
+        && store.get('adminOperationId', null) == null;
+    }
+    function file(types) {
+      return request.resource.size > 0 && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType in types;
+    }
+    match /product-images/{storeId}/{fileName} {
+      allow get: if active();
+      allow create, update: if storeOwner(storeId) && file(['image/jpeg', 'image/png', 'image/webp']);
+      allow delete: if storeOwner(storeId);
+    }
+    match /review-proofs/{uid}/{fileName} {
+      function reviewingStore() {
+        let review = firestore.get(/databases/(default)/documents/reviews/$(fileName.split('[.]')[0])).data;
+        return storeOwner(review.storeId) && review.userId == uid;
+      }
+      allow get: if active() && (request.auth.uid == uid || admin() || reviewingStore());
+      allow create: if resource == null && active() && request.auth.uid == uid && profile().get('role', 'Customer') == 'Customer'
+        && fileName.matches('[A-Za-z0-9_-]+[.](jpeg|jpg|png|webp|gif)')
+        && request.resource.size < 5 * 1024 * 1024
+        && file(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+      // No replacement of submitted evidence. Owner deletion supports failed-upload cleanup.
+      allow delete: if active() && request.auth.uid == uid
+        && !firestore.exists(/databases/(default)/documents/reviews/$(fileName.split('[.]')[0]));
+    }
+    match /permit-submissions/{uid}/{submissionId}/{fileName} {
+      function uploading() {
+        let submission = firestore.get(/databases/(default)/documents/permitSubmissions/$(submissionId)).data;
+        return submission.uid == uid && submission.status == 'uploading';
+      }
+      allow get: if active() && (request.auth.uid == uid || admin());
+      allow create: if resource == null && active() && request.auth.uid == uid && profile().get('role', '') == 'Store Admin'
+        && uploading() && file(['image/jpeg', 'image/png', 'application/pdf']);
+      // Submitted permits are immutable; trusted maintenance owns retention/deletion.
+    }
+    match /{path=**} { allow read, write: if false; }
+  }
+}

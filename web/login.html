@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=5" />
+    <title>Store Admin Login | TechKnow</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="auth.css" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="auth-aside">
+        <div>
+          <img class="auth-logo" src="teamlogo-clean.png" alt="TechKnow" />
+          <h1>Keep your shop moving.</h1>
+          <p>
+            Manage your products, reservations, reviews, permits, and store
+            insights from one focused workspace.
+          </p>
+          <div class="aside-list">
+            <div>
+              <i class="fa fa-boxes-stacked"></i
+              ><span>Keep listings current</span>
+            </div>
+            <div>
+              <i class="fa fa-calendar-check"></i
+              ><span>Stay on top of reservations</span>
+            </div>
+            <div>
+              <i class="fa fa-chart-line"></i
+              ><span>Understand customer demand</span>
+            </div>
+          </div>
+        </div>
+        <small>Store Admin Workspace</small>
+      </section>
+      <section class="auth-main">
+        <a class="auth-back" href="landing.html"
+          ><i class="fa fa-arrow-left"></i> Back to TechKnow </a
+        ><span class="auth-kicker"> Landing Page</span>
+        <h2>Welcome back</h2>
+        <p class="auth-intro">
+          Log in to manage your shop and keep your customers informed.
+        </p>
+        <form class="auth-form" id="login-form">
+          <div class="field">
+            <label for="username">Business email</label
+            ><input
+              id="username"
+              name="username"
+              type="email"
+              autocomplete="username"
+              placeholder="Enter your business email"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+                required
+              /><button
+                class="password-toggle"
+                type="button"
+                data-target="password"
+                aria-label="Show password"
+              >
+                <i class="fa fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <button class="auth-submit" type="submit">
+            Log in to Admin Portal <i class="fa fa-arrow-right"></i>
+          </button>
+          <div class="notice" id="login-notice" role="status"></div>
+        </form>
+        <p class="auth-switch">
+          New to TechKnow?
+          <a href="signup.html">Create a Store Admin account</a>
+        </p>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-storage-compat.js"></script>
+    <script src="../backend/config/firebase-config.js"></script>
+    <script src="firebase-config.js?v=20261023"></script>
+    <script src="../backend/services/presence.js"></script>
+    <script src="presence.js"></script>
+    <script src="../backend/domain/reservations.js"></script>
+    <script src="../backend/services/admin.js"></script>
+    <script>
+      document.querySelectorAll(".password-toggle").forEach((b) =>
+        b.addEventListener("click", () => {
+          const i = document.getElementById(b.dataset.target);
+          const show = i.type === "password";
+          i.type = show ? "text" : "password";
+          b.innerHTML = show
+            ? '<i class="fa fa-eye-slash"></i>'
+            : '<i class="fa fa-eye"></i>';
+        }),
+      );
+      const loginForm = document.getElementById("login-form");
+      const loginButton = loginForm.querySelector("button[type=submit]");
+      const loginNotice = document.getElementById("login-notice");
+
+      function showLoginNotice(message, isError = false) {
+        loginNotice.textContent = message;
+        loginNotice.style.background = isError ? "#fff5f5" : "#f0fdf4";
+        loginNotice.style.color = isError ? "var(--danger)" : "var(--green)";
+        loginNotice.classList.add("show");
+      }
+
+      async function resolveLoginEmail(identifier) {
+        const normalized = identifier.trim().toLowerCase();
+        if (normalized.includes("@")) return normalized;
+        throw Object.assign(new Error("Use your business email to sign in."), { code: "auth/invalid-email" });
+      }
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const identifier = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        if (!identifier || !password) return;
+
+        loginButton.disabled = true;
+        loginButton.innerHTML = 'Signing in... <i class="fa fa-spinner fa-spin"></i>';
+        loginNotice.classList.remove("show");
+
+        try {
+          const { auth, db, persistenceReady } = window.techKnowFirebase;
+          await persistenceReady;
+          const email = await resolveLoginEmail(identifier, db);
+          const session = await window.techKnowAdmin.signIn(window.techKnowFirebase, { email, password, role: "Store Admin" });
+          if (session.storeId) localStorage.setItem("techknowStoreId", session.storeId);
+          showLoginNotice("Signed in successfully. Opening your admin portal...");
+          window.setTimeout(() => {
+            window.location.href = "admin.html";
+          }, 350);
+        } catch (error) {
+          const messages = {
+            "auth/invalid-credential": "The email or password is incorrect.",
+            "auth/user-not-found": "The email or password is incorrect.",
+            "auth/invalid-email": "Enter a valid business email address.",
+            "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+            "permission-denied": "This account cannot open the admin portal. Use your authorized admin email.",
+          };
+          showLoginNotice(
+            messages[error.code] || "Unable to sign in right now. Please try again.",
+            true,
+          );
+          loginButton.disabled = false;
+          loginButton.innerHTML = 'Log in to Admin Portal <i class="fa fa-arrow-right"></i>';
+        }
+      });
+    </script>
+  </body>
+</html>

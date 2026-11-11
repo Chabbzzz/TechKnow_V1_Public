@@ -1,0 +1,45 @@
+{
+  "name": "capstone2fullstackdev",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "node node_modules/expo/bin/cli start",
+    "android": "node node_modules/expo/bin/cli start --android",
+    "ios": "node node_modules/expo/bin/cli start --ios",
+    "web": "node node_modules/expo/bin/cli start --web",
+    "test:backend": "node --test backend/tests/*.test.cjs",
+    "test:rules": "npx --yes firebase-tools@15.34.1 emulators:exec --project demo-techknow-security --config firebase.security.json --only firestore,storage \"node --test backend/rules-tests/*.test.cjs\"",
+    "build:hosting": "node scripts/build-hosting.cjs"
+  },
+  "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "9.1.0",
+    "expo": "~57.0.30",
+    "expo-blur": "~57.0.3",
+    "expo-constants": "~57.0.22",
+    "expo-file-system": "~57.0.7",
+    "expo-font": "~57.0.4",
+    "expo-image-manipulator": "~57.0.21",
+    "expo-image-picker": "~57.0.20",
+    "expo-linear-gradient": "~57.0.2",
+    "expo-linking": "~57.0.13",
+    "expo-location": "~57.0.21",
+    "expo-router": "~57.0.28",
+    "expo-splash-screen": "~57.0.10",
+    "expo-status-bar": "~57.0.1",
+    "firebase": "^12.19.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "^0.21.0",
+    "react-native-webview": "13.16.1"
+  },
+  "private": true,
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2"
+  }
+}

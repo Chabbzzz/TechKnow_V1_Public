@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="favicon.png?v=5" />
+  <title>Super Admin Login | TechKnow</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="superadmin-login.css" />
+</head>
+<body data-auth-portal="superadmin">
+  <main class="auth-shell">
+    <section class="auth-aside">
+      <div>
+        <img class="auth-logo" src="teamlogo-clean.png" alt="TechKnow" />
+        <h1>Your platform,<br />in one place.</h1>
+        <p>Explore shops, accounts, products and reservations, and customer feedback from your super-admin workspace.</p>
+        <div class="aside-list">
+          <div><i class="fa fa-store" aria-hidden="true"></i><span>See activity across shops</span></div>
+          <div><i class="fa fa-users" aria-hidden="true"></i><span>Explore account management</span></div>
+          <div><i class="fa fa-shield-halved" aria-hidden="true"></i><span>Review feedback and system logs</span></div>
+        </div>
+      </div>
+      <small>Super Admin Workspace</small>
+    </section>
+    <section class="auth-main">
+      <a class="auth-back" href="landing.html"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to TechKnow</a>
+      <span class="auth-kicker">Platform administration</span>
+      <h2>Super admin login</h2>
+      <p class="auth-intro">Sign in with your platform administrator account to manage shops, accounts, and customer feedback.</p>
+      <div class="superadmin-login-note"><i class="fa fa-shield-halved" aria-hidden="true"></i><span><strong>Platform administrator access</strong>This login is reserved for the single authorized super-admin account.</span></div>
+      <form class="auth-form" id="superadmin-login-form">
+        <div class="field">
+          <label for="email">Super-admin email</label>
+          <input id="email" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Enter your super-admin email" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
+            <button class="password-toggle" type="button" id="toggle-password" aria-label="Show password" aria-pressed="false"><i class="fa fa-eye" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <button class="auth-submit" type="submit">Log in to Super Admin <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        <div class="notice" id="superadmin-login-notice" role="alert" aria-live="polite"></div>
+      </form>
+      <p class="auth-switch">Managing a shop? <a href="login.html">Store admin login</a></p>
+    </section>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../backend/config/firebase-config.js"></script>
+  <script src="firebase-config.js?v=20261023"></script>
+  <script src="../backend/services/presence.js"></script>
+  <script src="presence.js"></script>
+  <script src="../backend/domain/reservations.js"></script>
+  <script src="../backend/services/admin.js"></script>
+  <script src="superadmin-login.js"></script>
+</body>
+</html>

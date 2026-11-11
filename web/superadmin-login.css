@@ -1,0 +1,6 @@
+.auth-aside { background: #12233e; }
+.superadmin-login-note { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 22px; padding: 13px 15px; border: 1px solid #d8e4f8; border-radius: 9px; background: #f3f7ff; color: #56657b; font-size: 12px; line-height: 1.7; }
+.superadmin-login-note > i { margin-top: 4px; color: #245cca; }
+.superadmin-login-note strong { display: block; color: #1c2b44; font-weight: 600; }
+.auth-submit:disabled { opacity: .65; cursor: wait; }
+.notice.show { background: #fff5f5; color: var(--danger); }

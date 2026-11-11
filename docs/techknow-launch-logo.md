@@ -1,0 +1,15 @@
+# TechKnow launch logo
+
+Asset: `assets/techknow-launch-logo.png`
+
+Created with the built-in imagegen tool using `teamlogo-clean.png` as the original brand reference. The square layout places the TK symbol above blue TechKnow lettering and includes transparent padding for circular icon masks. The original logo files remain available for the app's other screens.
+
+Expo Go renders the configured app icon during loading. Its separate project-name label belongs to Expo Go and has no app-config text-color setting. The blue lettering is part of this logo asset. Native splash configuration uses this asset at an image width of 280; native changes require rebuilding the app.
+
+## Initial prompt
+
+Edit this existing TechKnow logo into a polished, correctly centered SQUARE app loading-screen brand asset, 1024 x 1024 pixels, with a transparent background. The input is the actual TechKnow brand logo, not a stylistic suggestion: preserve the distinctive original interlocking TK symbol geometry and its gray T and dark blue K, with sharp clean flat edges, no redesign, no shadow, no glow, no gradients. Recompose the original horizontal logo into a vertical lockup: TK symbol centered above the exact text 'TechKnow'. Use the original wordmark's clean geometric letter style, but color ALL letters of 'TechKnow' the same solid blue as the K: #064787. Maintain even visual spacing between symbol and wordmark, with the wordmark clearly readable, centered and proportionate. Entire logo-plus-wordmark composition must fit within the central 640 x 640 area of the 1024 x 1024 canvas and within a centered circular safe area of diameter 680 pixels so round Android adaptive icon masks do not clip it. The TK symbol should be about 340px tall; wordmark around 490px wide and 75px tall, separated by about 55px. Center the full combined composition vertically and horizontally. All surrounding padding fully transparent. Deliver only the final flat square production PNG asset, no mockup, no device, no border, no extra copy.
+
+## Final refinement prompt
+
+Precise production correction to this existing image. Keep exactly the TK logo above the exact word 'TechKnow' as shown. SCALE DOWN the entire existing artwork to 60% of its current width and height, centered on the SAME SIZE SQUARE TRANSPARENT CANVAS. This must create very generous empty transparent margins all around: the leftmost and rightmost artwork pixels should be near 25% and 75% of canvas width. DO NOT zoom in or crop to artwork. This large transparent padding is essential for Android adaptive app icon masks. Preserve the recognizable geometry of this exact mark and lettering. Clean the artwork into flat solid fills: T top bar neutral gray, K symbol and every letter of TechKnow all identical solid #064787. Remove any colored fringing, tiny specks, outlines, gradients, shading, texture, irregular edge pixels. Keep edges sharp and antialiased. Deliver a square transparent PNG production asset, artwork small and centered with generous padding.

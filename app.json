@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "TechKnow",
+    "slug": "capstone2fullstackdev",
+    "scheme": "techknow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/techknow-launch-logo.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/techknow-launch-logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.capstone2fullstackdev"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow TechKnow to find computer shops near your current location."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow TechKnow to select a receipt or invoice image for review verification."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/techknow-launch-logo.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-status-bar"
+    ]
+  }
+}
